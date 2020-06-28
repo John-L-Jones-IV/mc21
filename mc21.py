@@ -1,108 +1,42 @@
 #!/usr/bin/env python3
+"""
+mc21.py
+Main running script for Monte Carlo simulations of 21
+"""
 import random, os, time
 import matplotlib.pyplot as plt
 import numpy as np
 from multiprocessing import Pool
-from blackjack import Card, Status, Player, Dealer, UIPlayer, SimplePlayer
+from blackjack import Card, build_deck, Status, Player, Dealer, UIPlayer
 from blackjack import BasicStratPlayer, CCPlayer, HLPlayer, deal_cards
-from blackjack import clear_table, print_UI
+from blackjack import clear_table, print_UI, VALS, SUITS, Status, SimplePlayer
 
-TRIALS = 1000
-HANDS = 16000
-VALS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10','J', 'Q', 'K']
-SUITS = ['Clubs', 'Heart', 'Diamond', 'Spades']
-
-def UImain():
-    used_cards = []
-    cards_showing = []
-    deck = []
-    for decks in range(1):
-        for val in VALS:
-            for suit in SUITS:
-                deck.append(Card(suit, val))
-    random.shuffle(deck)
-    blank_card = Card('Plastic', 'Blank')
-    rand_index = 8 + random.randint(-4,4)
-    deck.insert(rand_index, blank_card)
-
-    player1 = UIPlayer(200.0, deck, used_cards, cards_showing)
-    dealer = Dealer(deck, used_cards, cards_showing)
-    while player1.balence > 0:
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print('Balence:', player1.balence)
-        s = int(input('Place wager amount: '))
-        player1.set_wager(s)
-        deal_cards([dealer, player1])
-
-        # UI player loop
-        while (player1.status != Status.STAND):
-            print_UI(dealer, player1)
-            player1.move()
-
-        while dealer.status != Status.STAND:
-            print_UI(dealer, player1, dealer_move=True)
-            dealer.move()
-            time.sleep(1)
-        print_UI(dealer, player1, dealer_move=True)
-
-        dealer_hand_val = dealer.best_hand_val()
-        p_hand_val = player1.best_hand_val()
-
-        if p_hand_val > 21 or p_hand_val <= 0:
-            print('You lose', player1.wager)
-            player1.lose()
-        elif player1.has_blackjack() and not dealer.has_blackjack():
-            print('You win', player1.wager)
-            player1.win()
-        elif not player1.has_blackjack() and dealer.has_blackjack():
-            print('You lose', player1.wager)
-            player1.lose()
-        elif p_hand_val > dealer_hand_val:
-            print('You win', player1.wager)
-            player1.win()
-        elif p_hand_val < dealer_hand_val:
-            print('You lose', player1.wager)
-            player1.lose()
-
-        input('\nhit any key to continue ')
-        clear_table([dealer, player1])
+TRIALS = 75
+HANDS = 1600
 
 def simulate_trial(num_hands):
-    """ returns balence_log array for player one during simulated number of hands """
+    """ returns balence_log array for player1 during simulated number of hands """
     balence_log = []
-    # init cards 
     used_cards = []
     cards_showing = []
-    deck = []
-    for _ in range(8):
-        for val in VALS:
-            for suit in SUITS:
-                deck.append(Card(suit, val))
-    random.shuffle(deck)
-    blank_card = Card('Plastic', 'Blank')
-    rand_index = 8 + random.randint(-4,4)
-    deck.insert(rand_index, blank_card)
+    deck = build_deck
 
     dealer = Dealer(deck, used_cards, cards_showing)
+
     # player1 = SimplePlayer(0, deck, used_cards, cards_showing)
     player1 = BasicStratPlayer(0, deck, used_cards, cards_showing, dealer)
     # player1 = HLPlayer(0, deck, used_cards, cards_showing, dealer)
 
-    players = [player1]
-    for j in range(num_hands):
-        deal_cards([dealer] + players)
+    for _ in range(num_hands):
+        deal_cards([dealer, player1])
         balence_log.append(player1.balence)
 
         # set wager
-        for player in players:
-            player.set_wager(1)
+        player1.set_wager(1)
 
         # player loop
-        while sum([player.status for player in players]):
-            for player in players:
-                if player.status == Status.STAND:
-                    continue
-                player.move()
+        while player1.status != Status.STAND:
+            player1.move()
 
         # dealer loop
         while dealer.status != Status.STAND:
