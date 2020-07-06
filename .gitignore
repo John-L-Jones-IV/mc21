@@ -1,3 +1,6 @@
 sandbox.py
 __pycache__/
 concurrent.futures
+*.pyc
+*roulette.py
+*graveyard.py

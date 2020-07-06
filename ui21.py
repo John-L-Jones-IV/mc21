@@ -8,18 +8,10 @@ relies on blackjack.py
 
 John L. Jones IV
 """
+import os
+from time import sleep
 from blackjack import Card, Player, Dealer, Status, deal_cards, clear_table
 from blackjack import print_UI, build_deck
-from time import sleep
-import os
-
-# Initialize
-game_over = False
-deck = build_deck()
-used_cards = []
-p1 = Player(deck, used_cards)
-dealer = Dealer(deck, used_cards)
-players = [p1, dealer]
 
 
 def get_wager():
@@ -70,6 +62,7 @@ def dealer_move():
         p1.disp_hand()
         sleep(1)
 
+
 def eval_hands():
     if p1.has_blackjack():
         p1.win(1.5)
@@ -84,10 +77,24 @@ def eval_hands():
         print('You lose.')
     sleep(1)
 
-while not game_over:
-    get_wager()
-    deal_cards([p1, dealer])
-    p1_move()
-    dealer_move()
-    eval_hands()
-    clear_table([p1, dealer])
+
+def main():
+    # Initialize
+    game_over = False
+    deck = build_deck()
+    used_cards = []
+    p1 = Player(deck, used_cards)
+    dealer = Dealer(deck, used_cards)
+    players = [p1, dealer]
+
+    while not game_over:
+        get_wager()
+        deal_cards([p1, dealer])
+        p1_move()
+        dealer_move()
+        eval_hands()
+        clear_table([p1, dealer])
+
+
+if __name__ == '__main__':
+    main()
