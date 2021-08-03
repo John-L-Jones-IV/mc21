@@ -2,13 +2,12 @@
 from __future__ import annotations
 from sys import exit
 
-import os
 import pygame
-import random
 
-import UI
+import eventhandler as eventhandler
+import gamelogic
 import gamevariables as gv
-import eventhandler as eh
+import UI
 
 
 def main():
@@ -16,13 +15,13 @@ def main():
     while True:
         clock.tick(UI.FPS)  # Ensure while loop only executes per FPS timing.
 
-        eh.handle_game_state(gv)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            eh.handle_event(event, gv, UI)
+            eventhandler.handle_event(event, gv, UI)
 
+        gamelogic.handle_game_state(gv, UI)
         UI.draw_screen(gv)
 
 
