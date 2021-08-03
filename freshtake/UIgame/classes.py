@@ -116,6 +116,16 @@ class Player:
             hand_idx = self.active_hand
         return _best_hand_value(self.get_hand(hand_idx))
 
+    def get_soft_hand_value(self, hand_idx=None):
+        if hand_idx == None:
+            hand_idx = self.active_hand
+        return _soft_hand_value(self.get_hand(hand_idx))
+
+    def get_hard_hand_value(self, hand_idx=None):
+        if hand_idx == None:
+            hand_idx = self.active_hand
+        return _hard_hand_value(self.get_hand(hand_idx))
+
     def get_hands(self):
         return self.hands
 
@@ -124,11 +134,11 @@ class Player:
             raise ValueError("wager must be an int greater than 0")
         self.wager = wager
 
-    def has_blackjack(self):
+    def is_hand_blackjack(self):
         if self.get_hand_value() == 21 and len(self.get_hand()) == 2:
             return True
 
-    def has_bust(self):
+    def is_hand_bust(self):
         return _best_hand_value(self.get_hand()) > 21
 
 
