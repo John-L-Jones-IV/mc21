@@ -12,6 +12,6 @@ MAX_SPLITS = 4
 deck = Deck(NUM_DECKS_IN_GAME)
 discard_pile = Deck(0)
 player1 = Player(STARTING_CASH)
-players = [player1]
 dealer = Dealer()
 state = GameState.DEAL_CARDS
+players = [player1]

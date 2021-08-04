@@ -12,7 +12,8 @@ def handle_game_state(game_vars, ui):
     elif state == GameState.PLACE_BETS:
         pass
     elif state == GameState.DEAL_CARDS:
-        game_vars.deck.deal_cards(game_vars.players)
+        all_players = game_vars.players + [game_vars.dealer]
+        game_vars.deck.deal_cards(all_players)
         game_vars.state = GameState.PLAY
     elif state == GameState.PLAY:
         play_state(game_vars, ui)

@@ -4,14 +4,8 @@ from typing import Tuple
 
 import pygame
 
-from UI import FONT_SIZE, BLACK
-
 # Colors
-WHITE = (0xFF, 0xFF, 0xFF)
 BLACK = (0x00, 0x00, 0x00)
-RED = (0xFF, 0x00, 0x00)
-BLUE = (0x00, 0x00, 0xFF)
-GREEN = (0x55, 0xAA, 0x55)  # 55AA55 is from card asset source image.
 
 # Fonts
 pygame.font.init()
