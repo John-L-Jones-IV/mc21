@@ -91,8 +91,7 @@ def _best_hand_value(cards):
 
 class Player:
     def __init__(self, starting_cash):
-        # (list of lists of cards, bet for specific list of cards) for multiple for split hands.
-        self.hands = [[]]
+        self.hands = [[]]  # list of lists of cards
         self.bankroll = starting_cash
         self.active_hand = 0  # used to index hands: list(list(Card))
 
@@ -101,28 +100,28 @@ class Player:
         self.active_hand += 1
 
     def add_card_to_hand(self, card, hand=None):
-        if hand == None:
+        if hand is None:
             hand = self.active_hand
         card.set_showing(True)
         self.hands[hand].append(card)
 
     def get_hand(self, hand_idx=None):
-        if hand_idx == None:
+        if hand_idx is None:
             hand_idx = self.active_hand
         return self.hands[hand_idx]
 
     def get_hand_value(self, hand_idx=None):
-        if hand_idx == None:
+        if hand_idx is None:
             hand_idx = self.active_hand
         return _best_hand_value(self.get_hand(hand_idx))
 
     def get_soft_hand_value(self, hand_idx=None):
-        if hand_idx == None:
+        if hand_idx is None:
             hand_idx = self.active_hand
         return _soft_hand_value(self.get_hand(hand_idx))
 
     def get_hard_hand_value(self, hand_idx=None):
-        if hand_idx == None:
+        if hand_idx is None:
             hand_idx = self.active_hand
         return _hard_hand_value(self.get_hand(hand_idx))
 

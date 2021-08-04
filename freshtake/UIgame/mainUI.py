@@ -11,17 +11,21 @@ import UI
 
 def main():
     clock = pygame.time.Clock()
-    while True:
-        clock.tick(UI.FPS)  # Ensure while loop only executes per FPS timing.
+    game_running = True
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            eventhandler.handle_event(event, game_vars, UI)
-
+    while game_running:
+        clock.tick(UI.FPS)  # Ensure while loop only executes at FPS rate.
+        process_user_input()
         gamelogic.handle_game_state(game_vars, UI)
         UI.draw_screen(game_vars)
+
+
+def process_user_input():
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+        eventhandler.handle_event(event, game_vars, UI)
 
 
 if __name__ == "__main__":

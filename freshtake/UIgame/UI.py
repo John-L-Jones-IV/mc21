@@ -1,8 +1,24 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+import os
 
 import pygame
-import os
+
+from buttonclickedfunctions import (
+    menu_button_clicked,
+    hit_button_clicked,
+    stand_button_clicked,
+    surrender_button_clicked,
+    split_button_clicked,
+    double_button_clicked,
+    deal_button_clicked,
+)
+from classes import GameState
+from uibutton import UIButton
+
+WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
+FPS = 120
+HAND_STEP = 250  # x distance between each split hand drawn on screen
 
 # Colors
 WHITE = (0xFF, 0xFF, 0xFF)
@@ -16,34 +32,28 @@ pygame.font.init()
 FONT_SIZE = 30
 FONT = pygame.font.SysFont("comicsans", FONT_SIZE)
 
-from uibutton import (
-    UIButton,
-)  # relies on colors and fonts so it can't be imported sooner
-from buttonclickedfunctions import *
-
-WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
-FPS = 120
-HAND_STEP = 250  # x distance between each split hand drawn on screen
-
 
 def draw_screen(game_vars):
+    """Evaluate state and draw screen with pygame."""
     window.fill(GREEN)
-    if game_vars.state == game_vars.GameState.MENU_AND_SETTINGS:
+    state = game_vars.state
+    if state == GameState.MENU_AND_SETTINGS:
         pass
-    elif game_vars.state == game_vars.GameState.PLACE_BETS:
+    elif state == GameState.PLACE_BETS:
         pass
-    elif game_vars.state == game_vars.GameState.PLAY:
+    elif state == GameState.PLAY:
         draw_buttons(play_decission_buttons)
         draw_active_hand_indicator(game_vars.player1.active_hand)
         draw_players_hands(game_vars.player1.get_hands())
         draw_dealers_hand(game_vars.dealer.get_hand())
-        draw_hand_value(game_vars)
-    elif game_vars.state == game_vars.GameState.EVALUATE_RESULTS:
+        draw_game_info(game_vars)
+    elif state == GameState.EVALUATE_RESULTS:
         pass
     pygame.display.flip()
 
 
 def draw_buttons(buttons):
+    """Call draw() method for each button in list(buttons)"""
     for b_key in buttons:
         buttons[b_key].draw(window)
 
@@ -109,7 +119,7 @@ def draw_dealers_hand(hand):
         draw_card(window, card, (x, y))
 
 
-def draw_hand_value(game_vars):
+def draw_game_info(game_vars):
     x_start, y = 250, 690
     x_offset = HAND_STEP * game_vars.player1.active_hand
     x = x_start + x_offset

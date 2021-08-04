@@ -1,8 +1,22 @@
 #!/usr/bin/evn python3
 from __future__ import annotations
+from typing import Tuple
+
 import pygame
 
 from UI import FONT_SIZE, BLACK
+
+# Colors
+WHITE = (0xFF, 0xFF, 0xFF)
+BLACK = (0x00, 0x00, 0x00)
+RED = (0xFF, 0x00, 0x00)
+BLUE = (0x00, 0x00, 0xFF)
+GREEN = (0x55, 0xAA, 0x55)  # 55AA55 is from card asset source image.
+
+# Fonts
+pygame.font.init()
+FONT_SIZE = 30
+FONT = pygame.font.SysFont("comicsans", FONT_SIZE)
 
 
 class UIButton:
@@ -30,7 +44,7 @@ class UIButton:
     def get_dimensions(self):
         return (self.x_position, self.y_position, self.width, self.height)
 
-    def is_mouse_position_colliding(self, mouse_pos: (mouse_x, mouse_y)) -> bool:
+    def is_mouse_position_colliding(self, mouse_pos: Tuple[int, int]) -> bool:
         if self.hidden or not self.active:
             return False
         mouse_x, mouse_y = mouse_pos
@@ -51,7 +65,7 @@ class UIButton:
     @staticmethod
     def _find_pos_of_smaller_rect_centered(
         large_rect: pygame.Rect(), small_rect: pygame.Rect()
-    ) -> (x_pos, y_pos):
+    ) -> Tuple[int, int]:
         """
         Given a large and small rectangle return the position needed
         to place the small rectange directly in the center of the large
@@ -68,7 +82,10 @@ class UIButton:
         return small_x, small_y
 
     def _draw_button(self, surface, rect):
-        color = self.ACTIVE_BTN_COLOR if self.active else self.NON_ACTIVE_BTN_COLOR
+        if self.active:
+            color = self.ACTIVE_BTN_COLOR
+        else:
+            color = self.NON_ACTIVE_BTN_COLOR
         pygame.draw.rect(surface, color, rect, border_radius=UIButton.BORDER_RADIUS)
 
     def _draw_text(self, surface, rect):

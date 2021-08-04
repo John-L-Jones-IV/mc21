@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 from classes import GameState
 from gamevariables import MAX_SPLITS
 

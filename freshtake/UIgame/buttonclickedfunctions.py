@@ -13,7 +13,7 @@ def stand_button_clicked(game_vars):
     if game_vars.player1.active_hand > 0:
         game_vars.player1.active_hand -= 1
     else:
-        game_vars.state = game_vars.GameState.EVALUATE_HANDS
+        game_vars.state = game_vars.GameState.EVALUATE_RESULTS
 
 
 def surrender_button_clicked(game_vars):

@@ -7,6 +7,9 @@ from classes import GameState
 
 
 def handle_event(event, game_vars, ui):
+    """Handle pygame events from user input.
+
+    Evaluate GameState and execute accordingly."""
     if game_vars.state == GameState.MENU_AND_SETTINGS:
         pass
     elif game_vars.state == GameState.PLACE_BETS:
@@ -14,12 +17,12 @@ def handle_event(event, game_vars, ui):
     elif game_vars.state == GameState.DEAL_CARDS:
         pass  # no user input required for DEAL_CARDS
     elif game_vars.state == GameState.PLAY:
-        handle_main_UI_event(event, game_vars, ui)
+        handle_play_event(event, game_vars, ui)
     elif game_vars.state == GameState.EVALUATE_RESULTS:
         pass  # no user input required for EVALUATE_RESULTS
 
 
-def handle_main_UI_event(event, game_vars, ui):
+def handle_play_event(event, game_vars, ui):
     if event.type == pygame.MOUSEBUTTONUP:
         mouse_pos = pygame.mouse.get_pos()
         btns = ui.play_decission_buttons
