@@ -9,8 +9,11 @@ import gamevariables as game_vars
 import UI
 
 
+clock = pygame.time.Clock()
+
+
 def main():
-    clock = pygame.time.Clock()
+    
     game_running = True
 
     while game_running:

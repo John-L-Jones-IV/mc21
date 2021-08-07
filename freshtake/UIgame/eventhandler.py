@@ -14,12 +14,9 @@ def handle_event(event, game_vars, ui):
         pass
     elif game_vars.state == GameState.PLACE_BETS:
         pass
-    elif game_vars.state == GameState.DEAL_CARDS:
-        pass  # no user input required for DEAL_CARDS
     elif game_vars.state == GameState.PLAY:
         handle_play_event(event, game_vars, ui)
-    elif game_vars.state == GameState.EVALUATE_RESULTS:
-        pass  # no user input required for EVALUATE_RESULTS
+    # no user input for other game states.
 
 
 def handle_play_event(event, game_vars, ui):

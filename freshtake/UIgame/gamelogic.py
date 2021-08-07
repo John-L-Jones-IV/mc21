@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-from classes import GameState
+import animations
+from classes import GameState, Player, Dealer
 from gamevariables import MAX_SPLITS
-
 
 def handle_game_state(game_vars, ui):
     state = game_vars.state
@@ -17,8 +17,18 @@ def handle_game_state(game_vars, ui):
         game_vars.state = GameState.PLAY
     elif state == GameState.PLAY:
         play_state(game_vars, ui)
+        update_play_state_buttons_activation_status(game_vars, ui)
     elif state == GameState.EVALUATE_RESULTS:
-        pass
+        evaluate_results_state(game_vars, ui)
+        animations.play_evaluate_hands(game_vars)
+        clear_table(game_vars)
+        game_vars.state = GameState.DEAL_CARDS
+
+def clear_table(game_vars):
+    all_players = game_vars.players + [game_vars.dealer]
+    discard_pile = game_vars.discard_pile
+    for player in all_players:
+        player.move_all_cards(discard_pile)
 
 
 def play_state(game_vars, ui):
@@ -32,7 +42,19 @@ def play_state(game_vars, ui):
             game_vars.state = GameState.EVALUATE_RESULTS
         return
 
-    update_play_state_buttons_activation_status(game_vars, ui)
+
+def evaluate_results_state(game_vars, ui):
+    update_evaluate_state_buttons_activation_status(ui)
+    animations.play_evaluate_hands(game_vars)
+    #update_play_state_activation_status(ui)
+    for hand in game_vars.player1.get_hands():
+        print('eval hand:', hand) 
+        
+
+
+def update_evaluate_state_buttons_activation_status(ui):
+    for _, btn in ui.play_decission_buttons.items():
+        btn.set_active(False)
 
 
 def update_play_state_buttons_activation_status(game_vars, ui):
@@ -42,23 +64,21 @@ def update_play_state_buttons_activation_status(game_vars, ui):
     hand_len = len(hand)
     btns = ui.play_decission_buttons
 
-    can_surrender = hand_len == 2 and num_hands == 1
-    if can_surrender:
-        btns["surrender"].set_active(True)
-    else:
-        btns["surrender"].set_active(False)
+    # hit always active in play state
+    btns["hit"].set_active(True)
 
-    if hand_len > 2:
-        btns["double"].set_active(False)
-    elif hand_len == 2:
-        btns["double"].set_active(True)
+    # stand always active in play state
+    btns["stand"].set_active(True)
 
-    can_split = (
+    is_surrender_btn_active = hand_len == 2 and num_hands == 1
+    btns["surrender"].set_active(is_surrender_btn_active)
+
+    is_double_btn_active = hand_len = 2
+    btns["double"].set_active(is_double_btn_active)
+
+    is_split_btn_active = (
         hand_len == 2
         and num_hands <= MAX_SPLITS
         and hand[0].get_value() == hand[1].get_value()
     )
-    if can_split:
-        btns["split"].set_active(True)
-    else:
-        btns["split"].set_active(False)
+    btns["split"].set_active(is_split_btn_active)

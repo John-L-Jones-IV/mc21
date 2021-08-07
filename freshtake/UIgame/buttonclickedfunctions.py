@@ -25,10 +25,12 @@ def split_button_clicked(game_vars):
     deck = game_vars.deck
     player = game_vars.player1
     player.split_hand()
-    for i in range(-1, -3, -1):
-        card = deck.pop()
-        card.set_showing(True)
-        player.hands[i].append(card)
+    card = deck.pop()
+    card.set_showing(True)
+    player.get_hand().append(card)
+    card = deck.pop()
+    card.set_showing(True)
+    player.get_hand(player.get_active_hand() - 1).append(card)
 
 
 def double_button_clicked(game_vars):
