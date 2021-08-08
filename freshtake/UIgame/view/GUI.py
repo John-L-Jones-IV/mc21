@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import os
+import sys
 
 import pygame
 
-from buttonclickedfunctions import (
+from model.classes import GameState
+from .buttonclickedfunctions import (
     menu_button_clicked,
     hit_button_clicked,
     stand_button_clicked,
@@ -13,8 +15,7 @@ from buttonclickedfunctions import (
     double_button_clicked,
     deal_button_clicked,
 )
-from classes import GameState
-from uibutton import UIButton
+from .guibutton import UIButton
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 FPS = 120

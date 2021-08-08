@@ -2,7 +2,7 @@
 from __future__ import annotations
 import random
 
-from classes import Card, Player, Dealer, GameState, Deck
+from .classes import Card, Player, Dealer, GameState, Deck
 
 NUM_DECKS_IN_GAME = 6
 STARTING_CASH = 200

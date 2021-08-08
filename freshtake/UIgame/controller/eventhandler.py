@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pygame
 
-from classes import GameState
+from model.classes import GameState
 
 
 def handle_event(event, game_vars, ui):

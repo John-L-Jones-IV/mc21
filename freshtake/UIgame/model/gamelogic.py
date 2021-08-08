@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import animations
-from classes import GameState, Player, Dealer
-from gamevariables import MAX_SPLITS
+import view.animations as animations
+from model.classes import GameState, Player, Dealer
+from model.gamevariables import MAX_SPLITS
 
 def handle_game_state(game_vars, ui):
     state = game_vars.state
