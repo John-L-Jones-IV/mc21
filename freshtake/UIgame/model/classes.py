@@ -61,6 +61,11 @@ class Hand:
             raise TypeError("card must be of type Card")
         self.hand.append(card)
 
+    # TODO: add iterable type functionality 
+
+    def pop(self):
+        return self.hand.pop()
+
     def _get_num_aces(self):
         num_aces = 0
         for card in self.hand:
@@ -79,19 +84,19 @@ class Hand:
 
     def get_second_best_value(self):
         max_hand_value = sum(card.get_value_as_int() for card in self.hand)
-        best_hand_value = self.get_best_hand_value()
+        best_hand_value = self.get_best_value()
         aces_used_in_best_hand = (max_hand_value - best_hand_value) // 10
         num_aces = self._get_num_aces()
         for ace_cnt in range(aces_used_in_best_hand + 1, num_aces + 1):
-            if max_hand_value - (act_cnt * 10) <= 21:
-                return max_hand_value - (act_cnt * 10)
-        return max_hand_value - (act_cnt * 10)
+            if max_hand_value - (ace_cnt * 10) <= 21:
+                return max_hand_value - (ace_cnt * 10)
+        return max_hand_value - (num_aces * 10)
 
     def is_bust(self):
-        return self.get_best_hand_value() > 21
+        return self.get_best_value() > 21
     
-    def is_black_jack(self):
-        return (self.get_best_hand_value() == 21 and len(self.hand) ==2)
+    def is_blackjack(self):
+        return (self.get_best_value() == 21 and len(self.hand) ==2)
 
 
 class Deck:
@@ -119,54 +124,42 @@ class Deck:
         self.deck.append(card)
 
 
-
-
-class Hand:
-    def __init__(self):
-        pass # TODO:
-
-
 class Player:
     def __init__(self, starting_cash):
-        self.hands = [[]]  # list of lists of cards
+        self.hands = [Hand()]   # list of Hand to handle splits
+        self.active_hand_index = 0
         self.bankroll = starting_cash
-        self.active_hand = 0  # used to index hands: list(list(Card))
 
     def split_hand(self):
-        self.hands.insert(self.active_hand,
-                          [self.hands[self.active_hand].pop()])
-        self.active_hand += 1
+        hand_idx = self.active_hand_index
+        new_hand = Hand()
+        new_hand.add_card(self.get_hand().pop())
+        self.hands.insert(hand_idx, new_hand)
+        self.active_hand_index += 1
 
-    def get_active_hand(self):
-        return self.active_hand
+    def get_active_hand_index(self):
+        return self.active_hand_index
 
     def add_card_to_hand(self, card, hand_idx=None):
         if hand_idx is None:
-            hand_idx = self.active_hand
+            hand_idx = self.active_hand_index
         card.set_showing(True)
-        self.hands[hand_idx].append(card)
+        self.hands[hand_idx].add_card(card)
 
     def get_hand(self, hand_idx=None):
         if hand_idx is None:
-            hand_idx = self.active_hand
+            hand_idx = self.active_hand_index
         return self.hands[hand_idx]
 
-    def get_hand_value(self, hand_idx=None):
+    def get_best_hand_value(self, hand_idx=None):
         if hand_idx is None:
             hand_idx = self.active_hand
-        return _best_hand_value(self.get_hand(hand_idx))
+        return hands[hand_idx].get_best_value()
 
-    # FIXME: replace with best hand value
-    def get_soft_hand_value(self, hand_idx=None):
+    def get_second_best_hand_value(self, hand_idx=None):
         if hand_idx is None:
             hand_idx = self.active_hand
-        return _soft_hand_value(self.get_hand(hand_idx))
-
-    # FIXME: replace with second best hand value
-    def get_hard_hand_value(self, hand_idx=None):
-        if hand_idx is None:
-            hand_idx = self.active_hand
-        return _hard_hand_value(self.get_hand(hand_idx))
+        return hands[hand_idx].get_second_best_value()
 
     def get_hands(self):
         return self.hands
@@ -179,13 +172,12 @@ class Player:
     def is_hand_blackjack(self, hand_idx=None):
         if hand_idx is None:
             hand_idx = self.active_hand
-        return (self.get_hand_value(hand_idx) == 21 
-                and len(self.get_hand(hand_idx)) == 2)
+        return hands[hand_idx].is_blackjack()
 
     def is_hand_bust(self, hand_idx=None):
         if hand_idx is None:
             hand_idx = self.active_hand
-        return _best_hand_value(self.get_hand(hand_idx)) > 21
+        return hands[hand_idx].is_bust()
     
     def move_all_cards(self, destination: list()):
         hands = copy.deepcopy(self.hands)

@@ -4,3 +4,4 @@ concurrent.futures
 *.pyc
 *roulette.py
 *graveyard.py
+**.vscode
