@@ -7,6 +7,7 @@ from model.classes import GameState
 
 
 def handle_event(event, game_vars, ui):
+    # more like read pygame events?
     """Handle pygame events from user input.
 
     Evaluate GameState and execute accordingly."""
@@ -20,6 +21,7 @@ def handle_event(event, game_vars, ui):
 
 
 def handle_play_event(event, game_vars, ui):
+    """handle pygame events for PLAY GameState"""
     if event.type == pygame.MOUSEBUTTONUP:
         mouse_pos = pygame.mouse.get_pos()
         btns = ui.play_decission_buttons

@@ -13,11 +13,21 @@ COL_NAMES = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
 SOURCE_IMG_PATH = "English_pattern_playing_cards_deck_1280x580_no_background.png"
 OUTPUT_DIR = "smallcards"
 
+def main():
+    ensure_directory(OUTPUT_DIR)
+    crop_and_save_macro()
+    
+
 if __name__ == "__main__":
+    main()
 
-    if not os.path.exists(OUTPUT_DIR):
-        os.makedirs(OUTPUT_DIR)
 
+def ensure_directory(dir):
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
+
+def crop_and_save_macro():
     with Image.open(SOURCE_IMG_PATH) as src_img:
         for row_cnt, row_val in enumerate(ROW_NAMES):
             for col_cnt, col_val in enumerate(COL_NAMES):
@@ -32,5 +42,3 @@ if __name__ == "__main__":
                     OUTPUT_DIR, row_val + "_" + col_val + ".png"
                 )
                 crop_img.save(crop_img_name)
-
-    src_img.load()  # .load() closes the file in case of failure.

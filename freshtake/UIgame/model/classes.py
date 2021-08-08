@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 from enum import IntEnum, auto
+import copy
 import random
-from copy import deepcopy
 
 
 CARD_VALS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
@@ -10,14 +10,15 @@ CARD_SUITS = ["hearts", "spades", "clubs", "diamonds"]
 
 
 class Card:
-    def __init__(self, suit, value):
+    # TODO: change parameters to value, suit
+    def __init__(self, suit: str, value: str):
         assert suit in CARD_SUITS
         assert value in CARD_VALS
         self.suit = suit
         self.value = value
         self.showing = False
 
-    def get_value(self, hard=False):
+    def get_value_as_int(self, hard=False) -> int:
         if self.value == "blank":
             raise ValueError("Cannot evaluate card with", self.value, "value.")
         if self.value == "A":
@@ -29,13 +30,13 @@ class Card:
             return 10
         return int(self.value)
 
-    def get_value_as_str(self):
+    def get_value_as_str(self) -> str:
         return self.value
 
     def set_showing(self, showingState: bool) -> None:
         self.showing = showingState
 
-    def get_suit(self):
+    def get_suit(self) -> str:
         return self.suit
 
     def __str__(self):
@@ -49,9 +50,48 @@ class Card:
             str_suit = "♦"
         elif self.suit == "spades":
             str_suit = "♠"
-        else:
-            str_suit = "fell through cases..."
         return str(self.value) + " " + str_suit
+
+class Hand:
+    def __init__(self):
+        self.hand = []  # List of Card
+
+    def add_card(self, card: Card) -> None:
+        if not isinstance(card, Card):
+            raise TypeError("card must be of type Card")
+        self.hand.append(card)
+
+    def _get_num_aces(self):
+        num_aces = 0
+        for card in self.hand:
+            if card.get_value_as_str() == "A":
+                num_aces += 1
+        return num_aces
+    
+    def get_best_value(self):
+        max_hand_value = sum(card.get_value_as_int() for card in self.hand)
+        if max_hand_value <= 21:
+            return max_hand_value
+        for num_aces in range(0, self._get_num_aces() + 1):
+            if max_hand_value - (num_aces * 10) <= 21:
+                return max_hand_value - (num_aces * 10)
+        return max_hand_value - (num_aces * 10)
+
+    def get_second_best_value(self):
+        max_hand_value = sum(card.get_value_as_int() for card in self.hand)
+        best_hand_value = self.get_best_hand_value()
+        aces_used_in_best_hand = (max_hand_value - best_hand_value) // 10
+        num_aces = self._get_num_aces()
+        for ace_cnt in range(aces_used_in_best_hand + 1, num_aces + 1):
+            if max_hand_value - (act_cnt * 10) <= 21:
+                return max_hand_value - (act_cnt * 10)
+        return max_hand_value - (act_cnt * 10)
+
+    def is_bust(self):
+        return self.get_best_hand_value() > 21
+    
+    def is_black_jack(self):
+        return (self.get_best_hand_value() == 21 and len(self.hand) ==2)
 
 
 class Deck:
@@ -79,20 +119,6 @@ class Deck:
         self.deck.append(card)
 
 
-def _soft_hand_value(cards):
-    return sum([card.get_value(hard=False) for card in cards])
-
-
-def _hard_hand_value(cards):
-    return sum([card.get_value(hard=True) for card in cards])
-
-
-def _best_hand_value(cards):
-    return (
-        _hard_hand_value(cards)
-        if _hard_hand_value(cards) <= 21
-        else _soft_hand_value(cards)
-    )
 
 
 class Hand:
@@ -162,7 +188,7 @@ class Player:
         return _best_hand_value(self.get_hand(hand_idx)) > 21
     
     def move_all_cards(self, destination: list()):
-        hands = deepcopy(self.hands)
+        hands = copy.deepcopy(self.hands)
         for hand_cnt, hand in enumerate(hands):
             for card in hand:
                 destination.append(self.hands[hand_cnt].pop())
@@ -183,7 +209,7 @@ class Dealer:
         return self.hand[1]
 
     def move_all_cards(self, destination: list()):
-        hand = deepcopy(self.hand)
+        hand = copy.deepcopy(self.hand)
         print(f'len dealer hand: {len(hand)}')
         for i, card in enumerate(hand):
             print(f"dealer card #: {i}")

@@ -5,11 +5,13 @@ def menu_button_clicked(game_vars):
 
 def hit_button_clicked(game_vars):
     print("hit button clicked!")
+    
     game_vars.deck.hit(game_vars.player1)
 
 
 def stand_button_clicked(game_vars):
     print("stand button clicked!")
+    # TODO: code smell! should only comunticate through controller
     if game_vars.player1.active_hand > 0:
         game_vars.player1.active_hand -= 1
     else:
@@ -22,6 +24,7 @@ def surrender_button_clicked(game_vars):
 
 def split_button_clicked(game_vars):
     print("split button clicked!")
+    # TODO: code smell! should only comunticate through controller
     deck = game_vars.deck
     player = game_vars.player1
     player.split_hand()

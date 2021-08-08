@@ -46,10 +46,6 @@ def play_state(game_vars, ui):
 def evaluate_results_state(game_vars, ui):
     update_evaluate_state_buttons_activation_status(ui)
     animations.play_evaluate_hands(game_vars)
-    #update_play_state_activation_status(ui)
-    for hand in game_vars.player1.get_hands():
-        print('eval hand:', hand) 
-        
 
 
 def update_evaluate_state_buttons_activation_status(ui):
