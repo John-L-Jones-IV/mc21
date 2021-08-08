@@ -6,7 +6,7 @@ import sys
 import pygame
 
 from model.classes import GameState
-from .buttonclickedfunctions import (
+from view.buttonclickedfunctions import (
     menu_button_clicked,
     hit_button_clicked,
     stand_button_clicked,
@@ -15,7 +15,7 @@ from .buttonclickedfunctions import (
     double_button_clicked,
     deal_button_clicked,
 )
-from .guibutton import UIButton
+from view.guibutton import UIButton
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 FPS = 120
@@ -44,7 +44,7 @@ def draw_screen(game_vars):
         pass
     elif state == GameState.PLAY:
         draw_buttons(play_decission_buttons)
-        draw_active_hand_indicator(game_vars.player1.active_hand)
+        draw_active_hand_indicator(game_vars.player1.get_active_hand_index())
         draw_players_hands(game_vars.player1.get_hands())
         draw_dealers_hand(game_vars.dealer.get_hand())
         draw_game_info(game_vars)
@@ -122,15 +122,15 @@ def draw_dealers_hand(hand):
 
 def draw_game_info(game_vars):
     x_start, y = 250, 690
-    x_offset = HAND_STEP * game_vars.player1.active_hand
+    x_offset = HAND_STEP * game_vars.player1.get_active_hand_index()
     x = x_start + x_offset
-    soft_hand_value = game_vars.player1.get_soft_hand_value()
-    hard_hand_value = game_vars.player1.get_hard_hand_value()
+    best_hand_value = game_vars.player1.get_best_hand_value()
+    second_best_hand_value = game_vars.player1.get_second_best_hand_value()
 
-    if soft_hand_value != hard_hand_value and soft_hand_value <= 21:
-        game_info_str = f"{soft_hand_value}/{hard_hand_value}"
+    if best_hand_value != second_best_hand_value and best_hand_value <= 21:
+        game_info_str = f"{second_best_hand_value}/{best_hand_value}"
     else:
-        game_info_str = str(hard_hand_value)
+        game_info_str = str(best_hand_value)
     text_surface = FONT.render(game_info_str, False, (0, 0, 0))
     window.blit(text_surface, (x, y))
 

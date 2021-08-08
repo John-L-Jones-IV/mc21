@@ -56,15 +56,25 @@ class Hand:
     def __init__(self):
         self.hand = []  # List of Card
 
+    def __iter__(self):
+        return self.hand.__iter__()
+    
+    def __next__(self):
+        return self.hand.__next__()
+    
+    def __len__(self):
+        return self.hand.__len__()
+
+    def __getitem__(self, key:int) -> Card:
+        return self.hand[key]
+
+    def pop(self):
+        return self.hand.pop()
+
     def add_card(self, card: Card) -> None:
         if not isinstance(card, Card):
             raise TypeError("card must be of type Card")
         self.hand.append(card)
-
-    # TODO: add iterable type functionality 
-
-    def pop(self):
-        return self.hand.pop()
 
     def _get_num_aces(self):
         num_aces = 0
@@ -109,7 +119,18 @@ class Deck:
                     self.deck.append(Card(card_suit, card_val))
         #    random.shuffle(self.deck)
 
+    def __len__(self):
+        return self.deck.__len__()
+    
+    def __iter__(self):
+        return self.deck.__iter__()
+
+    def __next__(self):
+        return self.deck.__next__()
+
     def pop(self):
+        if len(self.deck) == 0:
+            raise Exception("can not pop() from empty Deck")
         return self.deck.pop()
 
     def deal_cards(self, players):
@@ -153,13 +174,13 @@ class Player:
 
     def get_best_hand_value(self, hand_idx=None):
         if hand_idx is None:
-            hand_idx = self.active_hand
-        return hands[hand_idx].get_best_value()
+            hand_idx = self.active_hand_index
+        return self.hands[hand_idx].get_best_value()
 
     def get_second_best_hand_value(self, hand_idx=None):
         if hand_idx is None:
-            hand_idx = self.active_hand
-        return hands[hand_idx].get_second_best_value()
+            hand_idx = self.active_hand_index
+        return self.hands[hand_idx].get_second_best_value()
 
     def get_hands(self):
         return self.hands
@@ -171,15 +192,16 @@ class Player:
 
     def is_hand_blackjack(self, hand_idx=None):
         if hand_idx is None:
-            hand_idx = self.active_hand
-        return hands[hand_idx].is_blackjack()
+            hand_idx = self.active_hand_index
+        return self.hands[hand_idx].is_blackjack()
 
     def is_hand_bust(self, hand_idx=None):
         if hand_idx is None:
-            hand_idx = self.active_hand
-        return hands[hand_idx].is_bust()
+            hand_idx = self.active_hand_index
+        return self.hands[hand_idx].is_bust()
     
-    def move_all_cards(self, destination: list()):
+    def move_all_cards(self, destination: Deck()):
+        assert isinstance(destination, Deck)
         hands = copy.deepcopy(self.hands)
         for hand_cnt, hand in enumerate(hands):
             for card in hand:
@@ -187,12 +209,13 @@ class Player:
 
     
 class Dealer:
-    hand = []  # list of cards
+    def __init__(self):
+        self.hand = Hand()
 
     def add_card_to_hand(self, card):
         if len(self.hand) == 1:
             card.set_showing(True)
-        self.hand.append(card)
+        self.hand.add_card(card)
 
     def get_hand(self):
         return self.hand
@@ -202,9 +225,7 @@ class Dealer:
 
     def move_all_cards(self, destination: list()):
         hand = copy.deepcopy(self.hand)
-        print(f'len dealer hand: {len(hand)}')
         for i, card in enumerate(hand):
-            print(f"dealer card #: {i}")
             destination.append(self.hand.pop())
 
 

@@ -12,8 +12,8 @@ def hit_button_clicked(game_vars):
 def stand_button_clicked(game_vars):
     print("stand button clicked!")
     # TODO: code smell! should only comunticate through controller
-    if game_vars.player1.active_hand > 0:
-        game_vars.player1.active_hand -= 1
+    if game_vars.player1.active_hand_index > 0:
+        game_vars.player1.active_hand_index -= 1
     else:
         game_vars.state = game_vars.GameState.EVALUATE_RESULTS
 
@@ -30,10 +30,10 @@ def split_button_clicked(game_vars):
     player.split_hand()
     card = deck.pop()
     card.set_showing(True)
-    player.get_hand().append(card)
+    player.get_hand().add_card(card)
     card = deck.pop()
     card.set_showing(True)
-    player.get_hand(player.get_active_hand() - 1).append(card)
+    player.get_hand(player.get_active_hand_index() - 1).add_card(card)
 
 
 def double_button_clicked(game_vars):

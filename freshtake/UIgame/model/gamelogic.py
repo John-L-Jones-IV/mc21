@@ -33,11 +33,11 @@ def clear_table(game_vars):
 
 def play_state(game_vars, ui):
     player = game_vars.player1
-    more_split_hands = player.active_hand > 0
+    more_split_hands = player.get_active_hand_index() > 0
 
     if player.is_hand_blackjack() or player.is_hand_bust():
         if more_split_hands:
-            player.active_hand -= 1
+            player.active_hand_index -= 1
         else:
             game_vars.state = GameState.EVALUATE_RESULTS
         return
@@ -75,6 +75,6 @@ def update_play_state_buttons_activation_status(game_vars, ui):
     is_split_btn_active = (
         hand_len == 2
         and num_hands <= MAX_SPLITS
-        and hand[0].get_value() == hand[1].get_value()
+        and hand[0].get_value_as_int() == hand[1].get_value_as_int()
     )
     btns["split"].set_active(is_split_btn_active)

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import view.GUI as GUI
 import pygame
-from mainUI import clock, process_user_input
+from mainGUI import clock, process_user_input
 
 def play_evaluate_hands(game_vars):
     for i in range(30):
