@@ -4,30 +4,35 @@ from sys import exit
 import pygame
 
 from model.blackjackcore import Game
-import controller.eventhandler as eventhandler
-import view.GUI as GUI
-
+import view.GUI as GUI  # FIXME: singleton?
 
 clock = pygame.time.Clock()
 
 
 def main():
-    
-    game_running = True
-
-    while game_running:
+    game = Game()
+    while True:
         clock.tick(GUI.FPS)  # Ensure while loop only executes at FPS rate.
-        process_user_input()
-        gamelogic.handle_game_state(game_vars, GUI)
-        GUI.draw_screen(game_vars)
+        process_user_input(game)
+        GUI.draw_screen(game)
 
 
-def process_user_input():
+def process_user_input(game):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        eventhandler.handle_event(event, game_vars, GUI)
+        handle_event(event, game)
+
+
+def handle_event(event, game):
+    """Handle pygame events from GUI and send request to blackjackcore."""
+    if event.type == pygame.MOUSEBUTTONUP:
+        mouse_pos = pygame.mouse.get_pos()
+        btns = GUI.play_decission_buttons
+        for _, btn in btns.items():
+            if btn.is_mouse_position_colliding(mouse_pos):
+                btn.function(game)
 
 
 if __name__ == "__main__":

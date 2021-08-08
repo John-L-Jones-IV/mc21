@@ -76,11 +76,11 @@ class Hand:
     def __getitem__(self, key: int) -> Card:
         return self.hand[key]
     
-    def set_bet(self, wager):
-        self.wager = wager
+    def set_bet(self, bet):
+        self.bet = bet
 
     def get_bet(self):
-        return self.wager
+        return self.bet
 
     def pop(self):
         return self.hand.pop()
@@ -121,6 +121,11 @@ class Hand:
     
     def is_blackjack(self):
         return (self.get_best_value() == 21 and len(self.hand) ==2)
+    
+    def is_splitable(self):
+        return (len(self.hand) == 2 
+                and self.hand[0].get_value_as_int() 
+                    == self.hand[1].get_value_as_int())
 
 
 class Deck:
@@ -161,9 +166,11 @@ class Deck:
 
 class Player:
     def __init__(self, bankroll=STARTING_CASH):
+        self.bankroll = bankroll
         self.hands = [Hand()]   # list of Hand to handle splits
         self.active_hand_index = 0
-        self.bankroll = bankroll
+        self.is_done_playing_hands = False
+        self.bet = MIN_BET
 
     def get_bankroll(self):
         return self.bankroll
@@ -185,6 +192,7 @@ class Player:
     def get_best_hand_value(self, hand_idx=None):
         if hand_idx is None:
             hand_idx = self.active_hand_index
+        print(hand_idx)
         return self.hands[hand_idx].get_best_value()
 
     def get_second_best_hand_value(self, hand_idx=None):
@@ -197,6 +205,9 @@ class Player:
             raise ValueError("Wager must be an int greater than 0")
         self.wager = wager
 
+    def set_is_done_playing_cards(self, is_done_playing_hands):
+        self.is_done_playing_hands = is_done_playign_hands
+
     def is_hand_blackjack(self, hand_idx=None):
         if hand_idx is None:
             hand_idx = self.active_hand_index
@@ -208,8 +219,10 @@ class Player:
         return self.hands[hand_idx].is_bust()
 
     def split_hand(self):
+        assert self.get_hand().is_splitable()
         hand_idx = self.active_hand_index
-        new_hand = Hand()
+        bet = self.get_hand().get_bet()
+        new_hand = Hand(bet)
         new_hand.add_card(self.get_hand().pop())
         self.hands.insert(hand_idx, new_hand)
         self.active_hand_index += 1
@@ -228,6 +241,13 @@ class Player:
                 copy_card.set_showing(False)
                 destination.append(copy_card)
                 self.hands[hand_cnt].pop()
+
+    def stand(self):
+        assert not self.is_done_playing_hands
+        if self.get_active_hand_index() == 0:
+            self.is_done_playing_hands = True
+            return
+        self.active_hand_index -= 1
 
 
 class Dealer:
@@ -261,6 +281,15 @@ class GameState(IntEnum):
     EVALUATE_RESULTS = auto()
 
 
+def gamestatemodifier(f):
+    """Decorater used for Game methods that can modify the game state."""
+    def wrapper(self):
+        # currenlty no pre check
+        f(self)
+        # currenlty no post check
+    return wrapper
+    
+
 class Game:
     def __init__(self):
         self.deck = Deck(NUM_DECKS_IN_GAME)
@@ -268,17 +297,30 @@ class Game:
         self.player1 = Player(STARTING_CASH)
         self.dealer = Dealer()
         self.state = GameState.DEAL_CARDS
-        self.players = [player1] # list for expandability
+        self.players = [self.player1] # list for expandability
         self.active_player_index = 0
-        self.players_and_dealer = players + [dealer]
+        self.players_and_dealer = self.players + [self.dealer]
 
     def get_state(self) -> GameState:
         return self.state
     
+
+    def is_hand_able_to_split(self, player_idx=None, hand_idx=None):
+        if player_idx is None:
+            player_idx = self.active_player_index
+
+    @gamestatemodifier
+    def deal_cards(self):
+        self.deck.deal_cards(players_and_dealer)
+        for player in players:
+            player.set_done_playing_card(False)
+        
+    @gamestatemodifier
     def clear_table(self):
         for player in self.players_and_dealer:
             player.move_all_cards(self.discard_pile)
 
+    @gamestatemodifier
     def evaluate_hands(self):
         dealer_score = self.dealer.get_hand().get_best_value_as_int()
 
@@ -298,3 +340,32 @@ class Game:
                     player.add_to_bankroll(losses)
                 else:
                     pass # push, no money won, no money lost
+
+    @gamestatemodifier
+    def hit_player(self, player_idx=None):
+        if player_idx is None:
+            player_idx = self.active_player_index
+        player = self.players[player_idx]
+        assert not player.get_hand().is_bust()
+        self.deck.hit(player)
+
+    @gamestatemodifier
+    def stand_player(self, player_idx=None):
+        if player_idx is None:
+            player_idx = self.active_player_index
+        player = self.players[player_idx]
+        player.stand()
+
+    @gamestatemodifier
+    def split_player(self, player_idx=None):
+        if player_idx is None:
+            player_idx = self.active_player_index
+        player = self.players[player_idx]
+        deck = self.deck
+        player.split_hand()
+        card = deck.pop()
+        card.set_showing(True)
+        player.get_hand().add_card(card)
+        card = deck.pop()
+        card.set_showing(True)
+        player.get_hand(player.get_active_hand_index() - 1).add_card(card)

@@ -5,8 +5,8 @@ import sys
 
 import pygame
 
-from model.classes import GameState
-from view.buttonclickedfunctions import (
+from model.blackjackcore import GameState
+from controller.buttonclickedfunctions import (
     menu_button_clicked,
     hit_button_clicked,
     stand_button_clicked,
@@ -15,7 +15,7 @@ from view.buttonclickedfunctions import (
     double_button_clicked,
     deal_button_clicked,
 )
-from view.guibutton import UIButton
+from view.GUIbutton import UIButton
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 FPS = 120
@@ -35,21 +35,13 @@ FONT = pygame.font.SysFont("comicsans", FONT_SIZE)
 
 
 def draw_screen(game_vars):
-    """Evaluate state and draw screen with pygame."""
+    """Draw screen with pygame."""
     window.fill(GREEN)
-    state = game_vars.state
-    if state == GameState.MENU_AND_SETTINGS:
-        pass
-    elif state == GameState.PLACE_BETS:
-        pass
-    elif state == GameState.PLAY:
-        draw_buttons(play_decission_buttons)
-        draw_active_hand_indicator(game_vars.player1.get_active_hand_index())
-        draw_players_hands(game_vars.player1.get_hands())
-        draw_dealers_hand(game_vars.dealer.get_hand())
-        draw_game_info(game_vars)
-    elif state == GameState.EVALUATE_RESULTS:
-        pass
+    draw_buttons(play_decission_buttons)
+    draw_active_hand_indicator(game_vars.player1.get_active_hand_index())
+    draw_players_hands(game_vars.player1.get_hands())
+    draw_dealers_hand(game_vars.dealer.get_hand())
+    draw_game_info(game_vars)
     pygame.display.flip()
 
 
@@ -152,6 +144,33 @@ def define_UI_buttons():
         "surrender": surrender_btn,
     }
 
+
+
+def update_play_state_buttons_activation_status(game_vars, ui):
+    player = game_vars.player1
+    hand = player.get_hand()
+    num_hands = len(player.get_hands())
+    hand_len = len(hand)
+    btns = ui.play_decission_buttons
+
+    # hit always active in play state
+    btns["hit"].set_active(True)
+
+    # stand always active in play state
+    btns["stand"].set_active(True)
+
+    is_surrender_btn_active = hand_len == 2 and num_hands == 1
+    btns["surrender"].set_active(is_surrender_btn_active)
+
+    is_double_btn_active = hand_len = 2
+    btns["double"].set_active(is_double_btn_active)
+
+    is_split_btn_active = (
+        hand_len == 2
+        and num_hands <= MAX_SPLITS
+        and hand[0].get_value_as_int() == hand[1].get_value_as_int()
+    )
+    btns["split"].set_active(is_split_btn_active)
 
 pygame.init()
 icon_img = pygame.image.load(os.path.join("assets", "blackjackicon.png"))
