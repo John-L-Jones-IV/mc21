@@ -296,3 +296,5 @@ class Game:
                 elif hand.get_value_as_int() < dealer_score:
                     losses = -1 * hand.get_bet()
                     player.add_to_bankroll(losses)
+                else:
+                    pass # push, no money won, no money lost

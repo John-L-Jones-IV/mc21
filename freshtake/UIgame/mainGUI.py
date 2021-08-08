@@ -3,9 +3,8 @@ from __future__ import annotations
 from sys import exit
 import pygame
 
+from model.blackjackcore import Game
 import controller.eventhandler as eventhandler
-import model.gamelogic as gamelogic
-import model.gamevariables as game_vars
 import view.GUI as GUI
 
 
