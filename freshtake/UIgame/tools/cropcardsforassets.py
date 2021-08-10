@@ -13,10 +13,11 @@ COL_NAMES = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
 SOURCE_IMG_PATH = "English_pattern_playing_cards_deck_1280x580_no_background.png"
 OUTPUT_DIR = "smallcards"
 
+
 def main():
     ensure_directory(OUTPUT_DIR)
     crop_and_save_macro()
-    
+
 
 if __name__ == "__main__":
     main()

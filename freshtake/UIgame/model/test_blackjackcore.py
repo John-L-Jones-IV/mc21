@@ -2,19 +2,23 @@
 import unittest
 import random
 
-from model.classes import Card, Hand, Player, Deck, Dealer
+from model.blackjackcore import Card, Hand, Player, Deck, Dealer
 
 SUITS = ["hearts", "spades", "diamonds", "clubs"]
+
 
 def get_random_suit():
     return random.choice(SUITS)
 
+
 randomsuit = get_random_suit()
+
 
 class TestHelperFunctions(unittest.TestCase):
     def test_get_random_suit(self):
         for i in range(28):
             self.assertIn(randomsuit, SUITS)
+
 
 class TestCardMethods(unittest.TestCase):
     def test_get_val_as_int(self):
@@ -26,7 +30,7 @@ class TestCardMethods(unittest.TestCase):
         self.assertEqual(card.get_value_as_int(), 11)
         card = Card("diamonds", "A")
         self.assertEqual(card.get_value_as_int(), 11)
-        
+
         card = Card("hearts", "J")
         self.assertEqual(card.get_value_as_int(), 10)
         card = Card("clubs", "Q")
@@ -54,7 +58,7 @@ class TestCardMethods(unittest.TestCase):
         self.assertEqual(card.get_value_as_str(), "A")
         card = Card("diamonds", "A")
         self.assertEqual(card.get_value_as_str(), "A")
-        
+
         card = Card("hearts", "J")
         self.assertEqual(card.get_value_as_str(), "J")
         card = Card("clubs", "Q")
@@ -336,13 +340,12 @@ class TestPlayerMethods(unittest.TestCase):
         player = Player(200)
         player.add_card_to_hand(Card(randomsuit, "A"))
         player.add_card_to_hand(Card(randomsuit, "A"))
-        player.split_hand()
+        card1 = Card("hearts", "10")
+        card2 = Card("hearts", "10")
+        player.split_hand(card1, card2)
         self.assertEqual(len(player.hands), 2)
         self.assertEqual(player.get_active_hand_index(), 1)
-        player.add_card_to_hand(Card(randomsuit, "10"))
         self.assertTrue(player.is_hand_blackjack())
-        first_hand = player.get_hand(0)
-        self.assertEqual(len(first_hand), 1)
 
 
 class TestDeckMethods(unittest.TestCase):

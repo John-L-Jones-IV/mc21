@@ -21,6 +21,8 @@ def split_button_clicked(game):
     print("split button clicked!")
     # TODO: code smell! should only comunticate through controller
     game.split_player()
+
+
 #    deck = game.deck
 #    player = game.player1
 #    player.split_hand()

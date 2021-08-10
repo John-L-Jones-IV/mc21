@@ -9,7 +9,7 @@ NUM_DECKS_IN_GAME = 6
 STARTING_CASH = 200
 MIN_BET = 5
 MAX_SPLITS = 4
-BLACKJACK_PAYS = 3.0/2.0
+BLACKJACK_PAYS = 3.0 / 2.0
 
 # generally, don't touch these.
 CARD_VALS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
@@ -29,10 +29,7 @@ class Card:
         if self.value == "blank":
             raise ValueError("Cannot evaluate card with", self.value, "value.")
         if self.value == "A":
-            if hard:
-                return 1
-            else:
-                return 11
+            return 11
         if self.value == "J" or self.value == "Q" or self.value == "K":
             return 10
         return int(self.value)
@@ -59,28 +56,23 @@ class Card:
             str_suit = "♠"
         return str(self.value) + " " + str_suit
 
+
 class Hand:
-    def __init__(self, bet=None):
+    def __init__(self, bet=MIN_BET):
         self.hand = []  # List of Card
         self.bet = bet
 
     def __iter__(self):
         return self.hand.__iter__()
-    
+
     def __next__(self):
         return self.hand.__next__()
-    
+
     def __len__(self):
-        return self.hand.__len__()
+        return len(self.hand)
 
     def __getitem__(self, key: int) -> Card:
         return self.hand[key]
-    
-    def set_bet(self, bet):
-        self.bet = bet
-
-    def get_bet(self):
-        return self.bet
 
     def pop(self):
         return self.hand.pop()
@@ -96,7 +88,7 @@ class Hand:
             if card.get_value_as_str() == "A":
                 num_aces += 1
         return num_aces
-    
+
     def get_best_value(self):
         max_hand_value = sum(card.get_value_as_int() for card in self.hand)
         if max_hand_value <= 21:
@@ -104,7 +96,7 @@ class Hand:
         for num_aces in range(0, self._get_num_aces() + 1):
             if max_hand_value - (num_aces * 10) <= 21:
                 return max_hand_value - (num_aces * 10)
-        return max_hand_value - (num_aces * 10)
+        return max_hand_value - (self._get_num_aces() * 10)
 
     def get_second_best_value(self):
         max_hand_value = sum(card.get_value_as_int() for card in self.hand)
@@ -118,14 +110,14 @@ class Hand:
 
     def is_bust(self):
         return self.get_best_value() > 21
-    
+
     def is_blackjack(self):
-        return (self.get_best_value() == 21 and len(self.hand) ==2)
-    
+        return self.get_best_value() == 21 and len(self.hand) == 2
+
     def is_splitable(self):
-        return (len(self.hand) == 2 
-                and self.hand[0].get_value_as_int() 
-                    == self.hand[1].get_value_as_int())
+        card1_value = self.hand[0].get_value_as_int()
+        card2_value = self.hand[1].get_value_as_int()
+        return len(self.hand) == 2 and card1_value == card2_value
 
 
 class Deck:
@@ -139,8 +131,8 @@ class Deck:
         #    random.shuffle(self.deck)
 
     def __len__(self):
-        return self.deck.__len__()
-    
+        return len(self.deck)
+
     def __iter__(self):
         return self.deck.__iter__()
 
@@ -148,8 +140,6 @@ class Deck:
         return self.deck.__next__()
 
     def pop(self):
-        if len(self.deck) == 0:
-            raise Exception("can not pop() from empty Deck")
         return self.deck.pop()
 
     def deal_cards(self, players):
@@ -164,90 +154,64 @@ class Deck:
         self.deck.append(card)
 
 
+def verify_player_hand_modifier(f):
+    def wrapper(self):
+        f(self)
+    return wrapper
+
+
 class Player:
     def __init__(self, bankroll=STARTING_CASH):
         self.bankroll = bankroll
-        self.hands = [Hand()]   # list of Hand to handle splits
+        self.hands = [Hand()]  # list of Hand to handle splits
         self.active_hand_index = 0
-        self.is_done_playing_hands = False
-        self.bet = MIN_BET
-
-    def get_bankroll(self):
-        return self.bankroll
-
-    def add_to_bankroll(self, dollar_amount):
-        self.bankroll += dollar_amount
 
     def get_active_hand_index(self):
         return self.active_hand_index
-
-    def get_hand(self, hand_idx=None):
-        if hand_idx is None:
-            hand_idx = self.active_hand_index
-        return self.hands[hand_idx]
-
+    
     def get_hands(self):
         return self.hands
 
-    def get_best_hand_value(self, hand_idx=None):
-        if hand_idx is None:
-            hand_idx = self.active_hand_index
-        print(hand_idx)
-        return self.hands[hand_idx].get_best_value()
+    def get_hand(self, hand_idx=None):
+        hand_idx = self.active_hand_index if hand_idx is None else hand_idx
+        return self.hands[hand_idx]
 
-    def get_second_best_hand_value(self, hand_idx=None):
-        if hand_idx is None:
-            hand_idx = self.active_hand_index
-        return self.hands[hand_idx].get_second_best_value()
+    def get_best_hand_value(self):
+        return self.get_hand().get_best_value()
 
-    def set_wager(self, wager):
-        if type(wager) is not int or wager < 0:
-            raise ValueError("Wager must be an int greater than 0")
-        self.wager = wager
+    def get_second_best_hand_value(self):
+        return self.get_hand().get_second_best_value()
 
-    def set_is_done_playing_cards(self, is_done_playing_hands):
-        self.is_done_playing_hands = is_done_playign_hands
+    def is_hand_blackjack(self):
+        return self.get_hand().is_blackjack()
 
-    def is_hand_blackjack(self, hand_idx=None):
-        if hand_idx is None:
-            hand_idx = self.active_hand_index
-        return self.hands[hand_idx].is_blackjack()
+    def is_hand_bust(self):
+        return self.get_hand().is_bust()
 
-    def is_hand_bust(self, hand_idx=None):
-        if hand_idx is None:
-            hand_idx = self.active_hand_index
-        return self.hands[hand_idx].is_bust()
-
-    def split_hand(self):
+    def split_hand(self, card1, card2):
         assert self.get_hand().is_splitable()
-        hand_idx = self.active_hand_index
-        bet = self.get_hand().get_bet()
+        base_hand = self.get_hand()
+        bet = base_hand.bet
         new_hand = Hand(bet)
-        new_hand.add_card(self.get_hand().pop())
-        self.hands.insert(hand_idx, new_hand)
+        new_hand.add_card(base_hand.pop())
+        self.hands.insert(self.active_hand_index, new_hand)
+        self.add_card_to_hand(card1)
         self.active_hand_index += 1
+        self.add_card_to_hand(card2)
 
-    def add_card_to_hand(self, card, hand_idx=None):
-        if hand_idx is None:
-            hand_idx = self.active_hand_index
+    def add_card_to_hand(self, card):
         card.set_showing(True)
-        self.hands[hand_idx].add_card(card)
+        self.get_hand().add_card(card)
 
-    def move_all_cards(self, destination: Deck()):
+    def move_all_cards(self, destination: Deck):
         assert isinstance(destination, Deck)
         copy_hands = copy.deepcopy(self.hands)
         for hand_cnt, copy_hand in enumerate(copy_hands):
             for copy_card in copy_hand:
                 copy_card.set_showing(False)
                 destination.append(copy_card)
-                self.hands[hand_cnt].pop()
-
-    def stand(self):
-        assert not self.is_done_playing_hands
-        if self.get_active_hand_index() == 0:
-            self.is_done_playing_hands = True
-            return
-        self.active_hand_index -= 1
+                self.hands[hand_cnt].pop() # free actual card from original hand
+        self.hands = [self.hands[0]] # don't leak memory
 
 
 class Dealer:
@@ -281,91 +245,81 @@ class GameState(IntEnum):
     EVALUATE_RESULTS = auto()
 
 
-def gamestatemodifier(f):
-    """Decorater used for Game methods that can modify the game state."""
+def playstatemethod(f):
     def wrapper(self):
-        # currenlty no pre check
         f(self)
-        # currenlty no post check
+        player = self.players[self.active_player_index]
+        if player.get_hand().is_blackjack() or player.get_hand().is_bust():
+            if player.active_hand_index > 0:
+                self.stand_player()
+            else:
+                self.evaluate_hands()
+                self.clear_table()
+                self.deal_cards()
     return wrapper
-    
+
 
 class Game:
     def __init__(self):
         self.deck = Deck(NUM_DECKS_IN_GAME)
         self.discard_pile = Deck(0)
-        self.player1 = Player(STARTING_CASH)
         self.dealer = Dealer()
-        self.state = GameState.DEAL_CARDS
-        self.players = [self.player1] # list for expandability
+        self.state = GameState.DEAL_CARDS   # helps view module
+        player1 = Player(STARTING_CASH)
+        self.players = [player1]  # list for expandability
         self.active_player_index = 0
-        self.players_and_dealer = self.players + [self.dealer]
 
     def get_state(self) -> GameState:
         return self.state
-    
 
-    def is_hand_able_to_split(self, player_idx=None, hand_idx=None):
-        if player_idx is None:
-            player_idx = self.active_player_index
-
-    @gamestatemodifier
     def deal_cards(self):
-        self.deck.deal_cards(players_and_dealer)
-        for player in players:
-            player.set_done_playing_card(False)
-        
-    @gamestatemodifier
+        for player in self.players:
+            assert len(player.get_hand()) == 0 and len(player.hands) == 1
+        assert len(self.dealer.get_hand()) == 0
+        self.deck.deal_cards(self.players + [self.dealer])
+
     def clear_table(self):
-        for player in self.players_and_dealer:
+        for player in self.players + [self.dealer]:
             player.move_all_cards(self.discard_pile)
 
-    @gamestatemodifier
     def evaluate_hands(self):
-        dealer_score = self.dealer.get_hand().get_best_value_as_int()
+        dealer_score = self.dealer.get_hand().get_best_value()
 
         for player in self.players:
             for hand in player.get_hands():
-                if hand.is_blackjack() and not dealer.hand.is_blackjack():
-                    winnings = hand.get_bet() * BLACKJACK_PAYS
-                    player.add_to_bankroll(winnings)
+                if hand.is_blackjack() and not self.dealer.hand.is_blackjack():
+                    player.bankroll += hand.bet * BLACKJACK_PAYS
                 elif hand.is_bust():
-                    losses = -1 * hand.get_bet()
-                    player.add_to_bankroll(losses)
-                elif hand.get_value_as_int() > dealer_score:
-                    winnings = hand.get_bet()
-                    player.add_to_bankroll(winnings)
-                elif hand.get_value_as_int() < dealer_score:
-                    losses = -1 * hand.get_bet()
-                    player.add_to_bankroll(losses)
+                    player.bankroll -= hand.bet
+                elif hand.get_best_value() > dealer_score:
+                    player.bankroll += hand.bet
+                elif hand.get_best_value() < dealer_score:
+                    player.bankroll -= hand.bet
                 else:
-                    pass # push, no money won, no money lost
+                    pass  # push, no money won, no money lost
 
-    @gamestatemodifier
-    def hit_player(self, player_idx=None):
-        if player_idx is None:
-            player_idx = self.active_player_index
+    @playstatemethod
+    def stand_player(self):
+        player = self.players[self.active_player_index]
+        if player.active_hand_index == 0:
+            self.evaluate_hands()
+            self.clear_table()
+            self.deal_cards()
+        else:
+            player.active_hand_index -= 1
+
+
+    @playstatemethod
+    def hit_player(self):
+        player_idx = self.active_player_index
         player = self.players[player_idx]
         assert not player.get_hand().is_bust()
         self.deck.hit(player)
 
-    @gamestatemodifier
-    def stand_player(self, player_idx=None):
-        if player_idx is None:
-            player_idx = self.active_player_index
+    @playstatemethod
+    def split_player(self):
+        player_idx = self.active_player_index
         player = self.players[player_idx]
-        player.stand()
-
-    @gamestatemodifier
-    def split_player(self, player_idx=None):
-        if player_idx is None:
-            player_idx = self.active_player_index
-        player = self.players[player_idx]
-        deck = self.deck
-        player.split_hand()
-        card = deck.pop()
-        card.set_showing(True)
-        player.get_hand().add_card(card)
-        card = deck.pop()
-        card.set_showing(True)
-        player.get_hand(player.get_active_hand_index() - 1).add_card(card)
+        card1 = self.deck.pop()
+        card2 = self.deck.pop()
+        player.split_hand(card1, card2)
