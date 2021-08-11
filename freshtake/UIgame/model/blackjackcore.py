@@ -128,7 +128,7 @@ class Deck:
             for card_val in CARD_VALS:
                 for card_suit in CARD_SUITS:
                     self.deck.append(Card(card_suit, card_val))
-        #    random.shuffle(self.deck)
+        random.shuffle(self.deck)
 
     def __len__(self):
         return len(self.deck)
@@ -245,7 +245,10 @@ class GameState(IntEnum):
     EVALUATE_RESULTS = auto()
 
 
-def playstatemethod(f):
+def addscardtohand(f):
+    """Decorater check if the player has blackjack or is busted.
+    
+    If true, finish playing the given hand."""
     def wrapper(self):
         f(self)
         player = self.players[self.active_player_index]
@@ -254,8 +257,6 @@ def playstatemethod(f):
                 self.stand_player()
             else:
                 self.evaluate_hands()
-                self.clear_table()
-                self.deal_cards()
     return wrapper
 
 
@@ -284,7 +285,6 @@ class Game:
 
     def evaluate_hands(self):
         dealer_score = self.dealer.get_hand().get_best_value()
-
         for player in self.players:
             for hand in player.get_hands():
                 if hand.is_blackjack() and not self.dealer.hand.is_blackjack():
@@ -298,28 +298,32 @@ class Game:
                 else:
                     pass  # push, no money won, no money lost
 
-    @playstatemethod
     def stand_player(self):
         player = self.players[self.active_player_index]
         if player.active_hand_index == 0:
             self.evaluate_hands()
-            self.clear_table()
-            self.deal_cards()
         else:
             player.active_hand_index -= 1
 
+    def surrender_player(self):
+        player = self.players[self.active_player_index]
 
-    @playstatemethod
+    def double_player(self):
+        player = self.players[self.active_player_index]
+        assert len(player.get_hand()) == 2
+        player.get_hand().bet *= 2
+        self.stand_player()
+
+    @addscardtohand
     def hit_player(self):
-        player_idx = self.active_player_index
-        player = self.players[player_idx]
+        player = self.players[self.active_player_index]
         assert not player.get_hand().is_bust()
         self.deck.hit(player)
 
-    @playstatemethod
+    @addscardtohand
     def split_player(self):
-        player_idx = self.active_player_index
-        player = self.players[player_idx]
+        player = self.players[self.active_player_index]
+        assert len(player.get_hands()) < MAX_SPLITS
         card1 = self.deck.pop()
         card2 = self.deck.pop()
         player.split_hand(card1, card2)

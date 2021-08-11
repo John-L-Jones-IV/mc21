@@ -7,13 +7,13 @@ import pygame
 
 from model.blackjackcore import GameState, MAX_SPLITS
 from controller.buttonclickedfunctions import (
-    menu_button_clicked,
-    hit_button_clicked,
-    stand_button_clicked,
-    surrender_button_clicked,
-    split_button_clicked,
-    double_button_clicked,
-    deal_button_clicked,
+        menu_button_clicked,
+        hit_button_clicked,
+        stand_button_clicked,
+        surrender_button_clicked,
+        split_button_clicked,
+        double_button_clicked,
+        deal_button_clicked,
 )
 from view.GUIbutton import UIButton
 

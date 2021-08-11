@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 from sys import exit
+
 import pygame
 
 from model.blackjackcore import Game
-import view.GUI as GUI  # FIXME: singleton?
+import view.GUI as GUI
 
 
 clock = pygame.time.Clock()
@@ -12,6 +13,7 @@ clock = pygame.time.Clock()
 
 def main():
     game = Game()
+    game.deal_cards()
     while True:
         clock.tick(GUI.FPS)  # Ensure while loop only executes at FPS rate.
         process_user_input(game)
