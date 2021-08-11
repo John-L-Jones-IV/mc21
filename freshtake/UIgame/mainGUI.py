@@ -12,6 +12,7 @@ clock = pygame.time.Clock()
 
 def main():
     game = Game()
+    game.deal_cards()
     while True:
         clock.tick(GUI.FPS)  # Ensure while loop only executes at FPS rate.
         process_user_input(game)
