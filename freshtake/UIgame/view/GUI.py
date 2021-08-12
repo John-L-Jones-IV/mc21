@@ -34,17 +34,20 @@ FONT_SIZE = 30
 FONT = pygame.font.SysFont("comicsans", FONT_SIZE)
 
 
+_previous_game_ = None # used to monitor state and trigger animations.
+
+
 def draw_screen(game):
     """Draw GUI screen with pygame."""
     window.fill(GREEN)
     update_buttons_active_status(game)
     draw_buttons(play_decission_buttons)
-    draw_active_hand_indicator(game.players[0].get_active_hand_index())
+    draw_active_hand_indicator(game.players[0].active_hand_index)
 
     # TODO: add shade to cards that are not active while drawing
-    draw_players_hands(game.players[0].get_hands())
+    draw_players_hands(game.players[0].hands)
 
-    draw_dealers_hand(game.dealer.get_hand())
+    draw_dealers_hand(game.dealer.hand)
     draw_game_info(game)
     pygame.display.flip()
 
@@ -65,8 +68,8 @@ def update_buttons_active_status(game):
 
 def update_play_state_buttons_activation_status(game):
     player = game.players[0]
-    hand = player.get_hand()
-    num_hands = len(player.get_hands())
+    hand = player.hand
+    num_hands = len(player.hands)
     hand_len = len(hand)
     btns = play_decission_buttons
 
@@ -85,7 +88,7 @@ def update_play_state_buttons_activation_status(game):
     is_split_btn_active = (
         hand_len == 2
         and num_hands <= MAX_SPLITS
-        and hand[0].get_value_as_int() == hand[1].get_value_as_int()
+        and hand[0].int_value == hand[1].int_value
     )
     btns["split"].set_active(is_split_btn_active)
 
@@ -119,7 +122,7 @@ def draw_chips(surface):
 def draw_card(
     window: pygame.Surface, card: gamevariabletypes.Card, pos: (x, y)
 ) -> None:
-    suit, val = card.get_suit(), card.get_value_as_str()
+    suit, val = card.suit, card.value
     if card.showing:
         img_path = os.path.join("assets", "cards", suit + "_" + val + ".png")
     else:
@@ -159,17 +162,20 @@ def draw_dealers_hand(hand):
 
 def draw_game_info(game):
     x_start, y = 250, 690
-    x_offset = HAND_STEP * game.players[0].get_active_hand_index()
+    x_offset = HAND_STEP * game.players[0].active_hand_index
     x = x_start + x_offset
-    best_hand_value = game.players[0].get_best_hand_value()
-    second_best_hand_value = game.players[0].get_second_best_hand_value()
+    best_hand_value = game.players[0].hand.best_value
+    second_best_hand_value = game.players[0].hand.second_best_value
 
     if best_hand_value != second_best_hand_value and best_hand_value <= 21:
         game_info_str = f"{second_best_hand_value}/{best_hand_value}"
     else:
         game_info_str = str(best_hand_value)
-    text_surface = FONT.render(game_info_str, False, (0, 0, 0))
+    text_surface = FONT.render(game_info_str, True, BLACK)
     window.blit(text_surface, (x, y))
+    text = str(game.players[0].bankroll)
+    text_surface = FONT.render(text, True, BLACK)
+    window.blit(text_surface, (150, 20))
 
 
 def define_UI_buttons():
