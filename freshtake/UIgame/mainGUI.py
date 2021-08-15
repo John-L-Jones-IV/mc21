@@ -20,7 +20,7 @@ def main():
         GUI.draw_screen(game)
 
 
-def process_user_input(game):
+def process_user_input(game: Game):
     """Handle pygame events."""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -29,7 +29,7 @@ def process_user_input(game):
         handle_event(event, game)
 
 
-def handle_event(event, game):
+def handle_event(event: pygame.event, game:Game):
     """Handle pygame events and send user request to blackjackcore."""
     if event.type == pygame.MOUSEBUTTONUP:
         mouse_pos = pygame.mouse.get_pos()
