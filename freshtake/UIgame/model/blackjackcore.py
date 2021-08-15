@@ -187,9 +187,9 @@ class Player:
         copy_hands = copy.deepcopy(self.hands)
         for hand_cnt, copy_hand in enumerate(copy_hands):
             for copy_card in copy_hand:
-                destination.append(copy_card)
-                self.hands[hand_cnt].pop()  # free actual card from original hand
-        self.hands = [self.hands[0]]  # don't leak memory
+                destination.push(copy_card) # move copy to destination
+                self.hands[hand_cnt].pop() # free actual card from original hand
+        self.hands = [self.hands[0]] # don't leak memory
 
 
 class Dealer:
@@ -199,6 +199,8 @@ class Dealer:
     def add_card_to_hand(self, card: Card):
         if len(self.hand) != 0:
             card.showing = True
+        else:
+            card.showing = False
         self.hand.push(card)
 
     @property
@@ -209,7 +211,7 @@ class Dealer:
         copy_hand = copy.deepcopy(self.hand)
         for i, copy_card in enumerate(copy_hand):
             copy_card.showing = False
-            destination.append(copy_card)
+            destination.push(copy_card)
             self.hand.pop()
 
 
@@ -219,7 +221,8 @@ def addscardtohand(f):
     If true, finish playing the given hand."""
 
     def wrapper(self):
-        f(self)
+        f(self) # execute decorated function,
+        # then do some post checks.
         player = self.players[self.active_player_index]
         if player.hand.is_blackjack() or player.hand.is_bust():
             if player.active_hand_index > 0:
@@ -236,8 +239,8 @@ class Game:
         self.discard_pile = Deck(0)
         self.dealer = Dealer()
         self.state = GameState.DEAL_CARDS  # helps view module
-        player1 = Player(STARTING_CASH)
-        self.players = [player1]  # list for expandability
+        self.player1 = Player(STARTING_CASH)
+        self.players = [self.player1]  # list for expandability
         self.active_player_index = 0
 
     def deal_cards(self):

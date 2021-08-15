@@ -2,7 +2,7 @@
 import unittest
 import random
 
-from model.blackjackcore import Card, Hand, Player, Deck, Dealer
+from model.blackjackcore import Card, Hand, Player, Deck, Dealer, Game
 
 SUITS = ["hearts", "spades", "diamonds", "clubs"]
 
@@ -81,132 +81,132 @@ class TestCardMethods(unittest.TestCase):
 class TestHandMethods(unittest.TestCase):
     def test_get_best_value(self):
         hand = Hand()
-        hand.add_card(Card("clubs", "A"))
-        hand.add_card(Card("clubs", "10"))
+        hand.push(Card("clubs", "A"))
+        hand.push(Card("clubs", "10"))
         self.assertEqual(hand.best_value, 21)
 
         hand = Hand()
-        hand.add_card(Card("clubs", "K"))
-        hand.add_card(Card("clubs", "10"))
+        hand.push(Card("clubs", "K"))
+        hand.push(Card("clubs", "10"))
         self.assertEqual(hand.best_value, 20)
 
         hand = Hand()
-        hand.add_card(Card("clubs", "K"))
-        hand.add_card(Card("clubs", "10"))
-        hand.add_card(Card("clubs", "J"))
+        hand.push(Card("clubs", "K"))
+        hand.push(Card("clubs", "10"))
+        hand.push(Card("clubs", "J"))
         self.assertEqual(hand.best_value, 30)
 
         hand = Hand()
-        hand.add_card(Card("clubs", "A"))
-        hand.add_card(Card("clubs", "10"))
-        hand.add_card(Card("clubs", "J"))
+        hand.push(Card("clubs", "A"))
+        hand.push(Card("clubs", "10"))
+        hand.push(Card("clubs", "J"))
         self.assertEqual(hand.best_value, 21)
 
         hand = Hand()
-        hand.add_card(Card("clubs", "A"))
-        hand.add_card(Card("clubs", "A"))
-        hand.add_card(Card("clubs", "9"))
+        hand.push(Card("clubs", "A"))
+        hand.push(Card("clubs", "A"))
+        hand.push(Card("clubs", "9"))
         self.assertEqual(hand.best_value, 21)
 
         hand = Hand()
-        hand.add_card(Card("clubs", "A"))
-        hand.add_card(Card("clubs", "A"))
-        hand.add_card(Card("clubs", "A"))
+        hand.push(Card("clubs", "A"))
+        hand.push(Card("clubs", "A"))
+        hand.push(Card("clubs", "A"))
         self.assertEqual(hand.best_value, 13)
 
         hand = Hand()
-        hand.add_card(Card("clubs", "2"))
-        hand.add_card(Card("clubs", "3"))
+        hand.push(Card("clubs", "2"))
+        hand.push(Card("clubs", "3"))
         self.assertEqual(hand.best_value, 5)
 
     def test_get_second_best_value(self):
         hand = Hand()
-        hand.add_card(Card("clubs", "A"))
-        hand.add_card(Card("clubs", "10"))
+        hand.push(Card("clubs", "A"))
+        hand.push(Card("clubs", "10"))
         self.assertEqual(hand.second_best_value, 11)
 
         hand = Hand()
-        hand.add_card(Card("clubs", "K"))
-        hand.add_card(Card("clubs", "10"))
+        hand.push(Card("clubs", "K"))
+        hand.push(Card("clubs", "10"))
         self.assertEqual(hand.second_best_value, 20)
 
         hand = Hand()
-        hand.add_card(Card("clubs", "A"))
-        hand.add_card(Card("clubs", "A"))
-        hand.add_card(Card("clubs", "A"))
+        hand.push(Card("clubs", "A"))
+        hand.push(Card("clubs", "A"))
+        hand.push(Card("clubs", "A"))
         self.assertEqual(hand.second_best_value, 3)
 
     def test_is_blackjack(self):
         hand = Hand()
-        hand.add_card(Card("spades", "K"))
-        hand.add_card(Card("hearts", "A"))
+        hand.push(Card("spades", "K"))
+        hand.push(Card("hearts", "A"))
         self.assertTrue(hand.is_blackjack())
 
         hand = Hand()
-        hand.add_card(Card("spades", "Q"))
-        hand.add_card(Card("hearts", "A"))
+        hand.push(Card("spades", "Q"))
+        hand.push(Card("hearts", "A"))
         self.assertTrue(hand.is_blackjack())
 
         hand = Hand()
-        hand.add_card(Card("spades", "Q"))
-        hand.add_card(Card("hearts", "5"))
-        hand.add_card(Card("diamonds", "6"))
+        hand.push(Card("spades", "Q"))
+        hand.push(Card("hearts", "5"))
+        hand.push(Card("diamonds", "6"))
         self.assertFalse(hand.is_blackjack())
 
         hand = Hand()
-        hand.add_card(Card("spades", "Q"))
-        hand.add_card(Card("hearts", "6"))
-        hand.add_card(Card("diamonds", "6"))
+        hand.push(Card("spades", "Q"))
+        hand.push(Card("hearts", "6"))
+        hand.push(Card("diamonds", "6"))
         self.assertFalse(hand.is_blackjack())
 
         hand = Hand()
-        hand.add_card(Card("spades", "Q"))
-        hand.add_card(Card("clubs", "10"))
+        hand.push(Card("spades", "Q"))
+        hand.push(Card("clubs", "10"))
         self.assertFalse(hand.is_blackjack())
 
         hand = Hand()
-        hand.add_card(Card("spades", "2"))
-        hand.add_card(Card("hearts", "2"))
+        hand.push(Card("spades", "2"))
+        hand.push(Card("hearts", "2"))
         self.assertFalse(hand.is_blackjack())
 
     def test_is_bust(self):
         hand = Hand()
-        hand.add_card(Card("spades", "K"))
-        hand.add_card(Card("hearts", "A"))
+        hand.push(Card("spades", "K"))
+        hand.push(Card("hearts", "A"))
         self.assertFalse(hand.is_bust())
 
         hand = Hand()
-        hand.add_card(Card("spades", "10"))
-        hand.add_card(Card("hearts", "A"))
+        hand.push(Card("spades", "10"))
+        hand.push(Card("hearts", "A"))
         self.assertFalse(hand.is_bust())
 
         hand = Hand()
-        hand.add_card(Card("spades", "K"))
-        hand.add_card(Card("hearts", "Q"))
+        hand.push(Card("spades", "K"))
+        hand.push(Card("hearts", "Q"))
         self.assertFalse(hand.is_bust())
 
         hand = Hand()
-        hand.add_card(Card("spades", "A"))
-        hand.add_card(Card("clubs", "3"))
-        hand.add_card(Card("hearts", "10"))
+        hand.push(Card("spades", "A"))
+        hand.push(Card("clubs", "3"))
+        hand.push(Card("hearts", "10"))
         self.assertFalse(hand.is_bust())
 
         hand = Hand()
         for i in range(21):
-            hand.add_card(Card("spades", "A"))
+            hand.push(Card("spades", "A"))
         self.assertFalse(hand.is_bust())
 
         hand = Hand()
-        hand.add_card(Card("spades", "7"))
-        hand.add_card(Card("hearts", "7"))
-        hand.add_card(Card("clubs", "8"))
+        hand.push(Card("spades", "7"))
+        hand.push(Card("hearts", "7"))
+        hand.push(Card("clubs", "8"))
         self.assertTrue(hand.is_bust())
 
         hand = Hand()
-        hand.add_card(Card("spades", "2"))
-        hand.add_card(Card("hearts", "7"))
-        hand.add_card(Card("clubs", "5"))
-        hand.add_card(Card("clubs", "K"))
+        hand.push(Card("spades", "2"))
+        hand.push(Card("hearts", "7"))
+        hand.push(Card("clubs", "5"))
+        hand.push(Card("clubs", "K"))
         self.assertTrue(hand.is_bust())
 
 
@@ -356,30 +356,22 @@ class TestDeckMethods(unittest.TestCase):
         self.assertIsInstance(card, Card)
         self.assertEqual(len(deck), 51)
 
-    def test_deal_cards(self):
+    def test_push(self):
         deck = Deck(1)
-        player1 = Player(200)
-        player2 = Player(200)
-        players = [player1, player2]
-        deck.deal_cards(players)
-        self.assertEqual(len(deck), 48)
-        self.assertEqual(len(player1.hand), 2)
-        self.assertEqual(len(player2.hand), 2)
+        self.assertEqual(len(deck), 52)
+        card = Card("hearts", "K")
+        deck.push(card)
+        self.assertEqual(len(deck), 53)
 
 
 class TestPolymorphMoveAllCardsMethods(unittest.TestCase):
     def test_move_all_cards(self):
-        deck = Deck(1)
-        discard_pile = Deck(0)
-        player1 = Player(200)
-        dealer = Dealer()
-        players = [player1, dealer]
-        deck.deal_cards(players)
-        for player in players:
-            player.move_all_cards(discard_pile)
-        self.assertEqual(len(deck), 48)
-        self.assertEqual(len(discard_pile), 4)
-        self.assertEqual(len(player1.hand), 0)
-        self.assertEqual(len(dealer.hand), 0)
-        for card in discard_pile:
+        game = Game()
+        game.deal_cards()
+        for player in game.players + [game.dealer]:
+            player.move_all_cards(game.discard_pile)
+        self.assertEqual(len(game.discard_pile), 4)
+        self.assertEqual(len(game.player1.hand), 0)
+        self.assertEqual(len(game.dealer.hand), 0)
+        for card in game.discard_pile:
             self.assertIsInstance(card, Card)

@@ -29,7 +29,7 @@ def process_user_input(game: Game):
         handle_event(event, game)
 
 
-def handle_event(event: pygame.event, game:Game):
+def handle_event(event: pygame.event, game: Game):
     """Handle pygame events and send user request to blackjackcore."""
     if event.type == pygame.MOUSEBUTTONUP:
         mouse_pos = pygame.mouse.get_pos()
