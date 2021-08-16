@@ -35,13 +35,43 @@ pygame.font.init()
 FONT_SIZE = 30
 FONT = pygame.font.SysFont("comicsans", FONT_SIZE)
 
-
+# modlue level persistent variables
+icon_img, window, play_decission_buttons = None, None, None
 _previous_game_ = None  # used to monitor state and trigger animations.
 
 
+def init():
+    pygame.init()
+    global icon_img, window, play_decission_buttons
+    icon_img = pygame.image.load(os.path.join("assets", "blackjackicon.png"))
+    pygame.display.set_icon(icon_img)
+    pygame.display.set_caption("mc21 - Blackjack for Humans")
+    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    play_decission_buttons = define_UI_buttons()
+
+def process_user_input(game: Game):
+    """Handle pygame events."""
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        handle_event(event, game)
+
+
+def handle_event(event: pygame.event, game: Game):
+    """Handle pygame events and send user request to blackjackcore."""
+    if event.type == pygame.MOUSEBUTTONUP:
+        mouse_pos = pygame.mouse.get_pos()
+        btns = play_decission_buttons
+        for _, btn in btns.items():
+            if btn.is_mouse_position_colliding(mouse_pos):
+                btn.function(game)
+
 def monitor_changes(game):
+    global _previous_game_
     get_diffs(_previous_game_, game)
     _previous_game_ = copy.deepcopy(game)
+
 
 def get_diffs(prev_obj, current_obj):
     if prev_obj is None:
@@ -51,6 +81,7 @@ def get_diffs(prev_obj, current_obj):
     cur_d = current_obj.__dict__
     prv_d = prev_obj.__dict__
     return {k: cur_d[k] for k in cur_d if cur_d[k] != prv_d[k]}
+
 
 def draw_screen(game):
     """Draw GUI screen with pygame."""
@@ -210,13 +241,6 @@ def define_UI_buttons():
         "surrender": surrender_btn,
     }
 
-def main():
-    pygame.init()
-    icon_img = pygame.image.load(os.path.join("assets", "blackjackicon.png"))
-    pygame.display.set_icon(icon_img)
-    pygame.display.set_caption("mc21 - Blackjack for Humans")
-    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    play_decission_buttons = define_UI_buttons()
 
 if __name__ == "__main__":
-    main()
+    init()

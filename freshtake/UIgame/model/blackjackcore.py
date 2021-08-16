@@ -162,7 +162,7 @@ class Deck:
 
     def __next__(self):
         return self._deck.__next__()
-    
+
     def __eq__(self, other):
         assert isinstance(other, Deck)
         try:
@@ -213,9 +213,9 @@ class Player:
         copy_hands = copy.deepcopy(self.hands)
         for hand_cnt, copy_hand in enumerate(copy_hands):
             for copy_card in copy_hand:
-                destination.push(copy_card) # move copy to destination
-                self.hands[hand_cnt].pop() # free actual card from original hand
-        self.hands = [self.hands[0]] # don't leak memory
+                destination.push(copy_card)  # move copy to destination
+                self.hands[hand_cnt].pop()  # free actual card from original hand
+        self.hands = [self.hands[0]]  # don't leak memory
 
     def __eq__(self, other):
         assert isinstance(other, Player)
@@ -259,13 +259,14 @@ class Dealer:
         assert isinstance(other, Dealer)
         return self.hand == other.hand
 
+
 def addscardtohand(f):
     """Decorater check if the player has blackjack or is busted.
-    
+
     If true, finish playing the given hand."""
 
     def wrapper(self):
-        f(self) # execute decorated function,
+        f(self)  # execute decorated function,
         # then do some post checks.
         player = self.players[self.active_player_index]
         if player.hand.is_blackjack() or player.hand.is_bust():

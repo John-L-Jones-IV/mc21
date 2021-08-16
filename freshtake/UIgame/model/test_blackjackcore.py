@@ -90,6 +90,7 @@ class TestCardMethods(unittest.TestCase):
         card2 = Card("hearts", "A")
         self.assertFalse(card1 == card2)
 
+
 class TestHandMethods(unittest.TestCase):
     def test_get_best_value(self):
         hand = Hand()
