@@ -77,6 +77,18 @@ class TestCardMethods(unittest.TestCase):
         card = Card("diamonds", "2")
         self.assertEqual(card.value, "2")
 
+    def test_eq(self):
+        card1 = Card("hearts", "10")
+        card2 = Card("hearts", "10")
+        self.assertTrue(card1 == card2)
+
+        card1 = Card("hearts", "A")
+        card2 = Card("hearts", "A")
+        self.assertTrue(card1 == card2)
+
+        card1 = Card("clubs", "A")
+        card2 = Card("hearts", "A")
+        self.assertFalse(card1 == card2)
 
 class TestHandMethods(unittest.TestCase):
     def test_get_best_value(self):
@@ -208,6 +220,19 @@ class TestHandMethods(unittest.TestCase):
         hand.push(Card("clubs", "5"))
         hand.push(Card("clubs", "K"))
         self.assertTrue(hand.is_bust())
+
+    def test_eq(self):
+        hand1 = Hand()
+        hand2 = Hand()
+        card = Card("spades", "2")
+        hand1.push(card)
+        card = Card("spades", "2")
+        hand2.push(card)
+        card = Card("hearts", "7")
+        hand1.push(card)
+        card = Card("hearts", "7")
+        hand2.push(card)
+        self.assertTrue(hand1 == hand2)
 
 
 class TestPlayerMethods(unittest.TestCase):
@@ -346,6 +371,14 @@ class TestPlayerMethods(unittest.TestCase):
         self.assertEqual(len(player.hands), 2)
         self.assertEqual(player.active_hand_index, 1)
         self.assertTrue(player.hand.is_blackjack())
+
+    def test_eq(self):
+        player1 = Player()
+        player2 = Player()
+        self.assertTrue(player1 == player2)
+        card = Card("clubs", "Q")
+        player1.add_card_to_hand(card)
+        self.assertFalse(player1 == player2)
 
 
 class TestDeckMethods(unittest.TestCase):

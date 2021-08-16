@@ -56,13 +56,17 @@ class Card:
     def __str__(self):
         if self.suit == "clubs":
             str_suit = "♣"
-        elif self.suit == "heart":
+        elif self.suit == "hearts":
             str_suit = "♥"
         elif self.suit == "diamonds":
             str_suit = "♦"
         elif self.suit == "spades":
             str_suit = "♠"
         return str(self.value) + " " + str_suit
+
+    def __eq__(self, other):
+        assert isinstance(other, Card)
+        return self._suit == other._suit and self._value == other._value
 
 
 class Hand:
@@ -128,6 +132,17 @@ class Hand:
         card2_value = self._hand[1].int_value
         return len(self._hand) == 2 and card1_value == card2_value
 
+    def __eq__(self, other):
+        assert isinstance(other, Hand)
+        try:
+            for i, _ in enumerate(self._hand):
+                if self._hand[i] == other._hand[i]:
+                    continue
+                return False
+            return True
+        except IndexError:
+            return False
+
 
 class Deck:
     def __init__(self, num_decks: int):
@@ -147,6 +162,17 @@ class Deck:
 
     def __next__(self):
         return self._deck.__next__()
+    
+    def __eq__(self, other):
+        assert isinstance(other, Deck)
+        try:
+            for i, card in enumerate(self._deck):
+                if card == other._deck[i]:
+                    continue
+                return False
+        except IndexError:
+            return False
+        return len(self._deck) == len(other._deck)
 
     def pop(self):
         return self._deck.pop()
@@ -191,6 +217,21 @@ class Player:
                 self.hands[hand_cnt].pop() # free actual card from original hand
         self.hands = [self.hands[0]] # don't leak memory
 
+    def __eq__(self, other):
+        assert isinstance(other, Player)
+        if self.bankroll != other.bankroll:
+            return False
+        if self.active_hand_index != other.active_hand_index:
+            return False
+        try:
+            for i, _ in enumerate(self.hands):
+                if self.hands[i] == other.hands[i]:
+                    continue
+                return False
+            return True
+        except IndexError:
+            return False
+
 
 class Dealer:
     def __init__(self):
@@ -214,6 +255,9 @@ class Dealer:
             destination.push(copy_card)
             self.hand.pop()
 
+    def __eq__(self, other):
+        assert isinstance(other, Dealer)
+        return self.hand == other.hand
 
 def addscardtohand(f):
     """Decorater check if the player has blackjack or is busted.
@@ -243,6 +287,23 @@ class Game:
         self.players = [self.player1]  # list for expandability
         self.active_player_index = 0
 
+    def __eq__(self, other):
+        assert isinstance(other, Game)
+        if self.deck != other.deck:
+            return False
+        if self.discard_pile != other.discard_pile:
+            return False
+        if self.dealer != other.dealer:
+            return False
+        if self.state != other.state:
+            return False
+        if self.player1 != other.player1:
+            return False
+        if self.active_player_index != other.active_player_index:
+            return False
+        return True
+
+    @addscardtohand
     def deal_cards(self):
         for player in self.players:
             assert len(player.hand) == 0 and len(player.hands) == 1

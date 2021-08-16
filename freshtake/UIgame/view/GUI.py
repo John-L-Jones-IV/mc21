@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+import copy
+import inspect
 import os
 import sys
 
 import pygame
 
-from model.blackjackcore import GameState, MAX_SPLITS
 from controller.buttonclickedfunctions import (
     menu_button_clicked,
     hit_button_clicked,
@@ -15,6 +16,7 @@ from controller.buttonclickedfunctions import (
     double_button_clicked,
     deal_button_clicked,
 )
+from model.blackjackcore import GameState, MAX_SPLITS
 from view.GUIbutton import UIButton
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
@@ -36,6 +38,19 @@ FONT = pygame.font.SysFont("comicsans", FONT_SIZE)
 
 _previous_game_ = None  # used to monitor state and trigger animations.
 
+
+def monitor_changes(game):
+    get_diffs(_previous_game_, game)
+    _previous_game_ = copy.deepcopy(game)
+
+def get_diffs(prev_obj, current_obj):
+    if prev_obj is None:
+        return current_obj.__dict__
+
+    assert isinstance(current_obj, type(prev_obj))
+    cur_d = current_obj.__dict__
+    prv_d = prev_obj.__dict__
+    return {k: cur_d[k] for k in cur_d if cur_d[k] != prv_d[k]}
 
 def draw_screen(game):
     """Draw GUI screen with pygame."""
@@ -195,10 +210,13 @@ def define_UI_buttons():
         "surrender": surrender_btn,
     }
 
+def main():
+    pygame.init()
+    icon_img = pygame.image.load(os.path.join("assets", "blackjackicon.png"))
+    pygame.display.set_icon(icon_img)
+    pygame.display.set_caption("mc21 - Blackjack for Humans")
+    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    play_decission_buttons = define_UI_buttons()
 
-pygame.init()
-icon_img = pygame.image.load(os.path.join("assets", "blackjackicon.png"))
-pygame.display.set_icon(icon_img)
-pygame.display.set_caption("mc21 - Blackjack for Humans")
-window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-play_decission_buttons = define_UI_buttons()
+if __name__ == "__main__":
+    main()
