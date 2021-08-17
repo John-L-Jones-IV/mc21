@@ -13,3 +13,8 @@ def play_evaluate_hands(game_vars):
         GUI.window.fill(GUI.GREEN)
         GUI.draw_chips(GUI.window)
         pygame.display.flip()
+
+
+def _move_card(card, start_pos, end_pos, frames):
+    start_x, start_y = start_pos
+    end_x, end_y = end_pos

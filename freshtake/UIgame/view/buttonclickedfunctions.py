@@ -1,4 +1,5 @@
 #!/usr/bin/evn python3
+import view.GUI as GUI
 def menu_button_clicked(game):
     print("menu button clicked!")
 
@@ -15,6 +16,7 @@ def stand_button_clicked(game):
 
 def surrender_button_clicked(game):
     print("surrender button clicked!")
+    game.surrender()
 
 
 def split_button_clicked(game):
@@ -30,3 +32,12 @@ def double_button_clicked(game):
 def deal_button_clicked(game):
     print("deal button clicked!")
     game.deal_cards()
+
+def bet_increase5_clicked(game):
+    print("bet increase 5 clicked!")
+    GUI.change_bet(5)
+
+
+def bet_decrease5_clicked(game):
+    print("bet decrease 5 clicked!")
+    GUI.change_bet(-5)

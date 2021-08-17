@@ -30,14 +30,12 @@ class TestHelperFunctions(unittest.TestCase):
             "deck",
             "discard_pile",
             "dealer",
-            "state",
             "player1",
             "players",
-            "active_player_index",
         ]
         for key in keys:
             self.assertIn(key, diffs)
-        self.assertEqual(len(diffs), 7)
+        self.assertEqual(len(diffs), 5)
 
         game1 = Game()
         game2 = copy.deepcopy(game1)

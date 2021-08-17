@@ -35,6 +35,9 @@ class UIButton:
     def set_active(self, activeState: bool) -> None:
         self.active = activeState
 
+    def set_hidden(self, hiddenState: bool) -> None:
+        self.hidden = hiddenState
+
     def get_dimensions(self):
         return (self.x_position, self.y_position, self.width, self.height)
 
