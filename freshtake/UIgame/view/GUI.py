@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/ GUI.GREEN3
 from __future__ import annotations
 import copy
 import inspect
@@ -7,6 +7,7 @@ import sys
 
 import pygame
 
+import view.animations as animis
 from model.blackjackcore import MAX_SPLITS, MAX_BET, MIN_BET
 from view.buttonclickedfunctions import (
     menu_button_clicked,
@@ -24,6 +25,8 @@ from view.GUIbutton import UIButton
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 FPS = 120
 HAND_STEP = 250  # x distance between each split hand drawn on screen
+
+DECK_POS = (150, 50)
 
 # Colors
 WHITE = (0xFF, 0xFF, 0xFF)
@@ -59,6 +62,7 @@ def update_screen(game):
         draw_players_hands(game.player1.hands)
         draw_dealers_hand(game.dealer.hand)
         draw_game_info(game)
+    draw_deck()
     draw_buttons(play_decission_buttons)
     draw_buttons(bet_buttons)
     draw_buttons(menu_buttons)
@@ -136,13 +140,21 @@ def monitor_changes_and_queue_animations(game):
         print("cards delt")
     elif len(game.deck) < len(_previous_game.deck):
         print("card moved from deck")
+        start_x, x_step = 200, 35
+        start_y, y_step = 550, -30
+        hand_idx = game.player1.active_hand_index
+        hand_len = len(game.player1.hand)
+        dest_x = start_x + hand_idx * HAND_STEP + hand_len * x_step
+        dest_y = start_y + hand_len * y_step
+        dest = (dest_x, dest_y)
+        card = game.player1.hand[-1]
+        animis.move_card(card, DECK_POS, dest)
     if len(game.discard_pile) > len(_previous_game.discard_pile):
         print("table cleared")
+        winnings = game.player1.bankroll - _previous_game.player1.bankroll
+        print(f"result: {winnings}")
     if len(game.discard_pile) < len(_previous_game.discard_pile):
         print("reshuffled")
-    if game.player1.bankroll != _previous_game.player1.bankroll:
-        print("player bankroll has changed", end=" ")
-        print(f"{game.player1.bankroll - _previous_game.player1.bankroll}")
     _previous_game = copy.deepcopy(game)
 
 
@@ -227,7 +239,13 @@ def draw_chips(surface):
         draw_chip(surface, color, pos, radius, text)
 
 
-def draw_card(window: pygame.Surface, card: blackjackcore.Card, pos: (x, y)) -> None:
+def draw_deck() -> None:
+    img_path = os.path.join("assets", "cardback.png")
+    img = pygame.image.load(img_path)
+    window.blit(img, DECK_POS)
+
+
+def draw_card(card: blackjackcore.Card, pos: (x, y)) -> None:
     suit, val = card.suit, card.value
     if card.showing:
         img_path = os.path.join("assets", "cards", suit + "_" + val + ".png")
@@ -245,7 +263,7 @@ def draw_players_hands(hands):
         for card_cnt, card in enumerate(hand):
             x = start_x + card_cnt * x_step + hand_cnt * HAND_STEP
             y = start_y + card_cnt * y_step
-            draw_card(window, card, (x, y))
+            draw_card(card, (x, y))
 
 
 def draw_active_hand_indicator(active_hand):
@@ -263,7 +281,7 @@ def draw_dealers_hand(hand):
     for cnt, card in enumerate(hand):
         x = start_x + cnt * x_step
         y = start_y + cnt * y_step
-        draw_card(window, card, (x, y))
+        draw_card(card, (x, y))
 
 
 def draw_bankroll(game):
@@ -288,9 +306,9 @@ def draw_game_info(game):
 
 
 def define_bet_buttons():
-    bet_increase5_btn = UIButton((20, 600, 100, 25), "+5", bet_increase5_clicked)
-    bet_decrease5_btn = UIButton((20, 675, 100, 25), "-5", bet_decrease5_clicked)
-    deal_btn = UIButton((20, 500, 100, 25), "Deal", deal_button_clicked)
+    bet_increase5_btn = UIButton((20, 605, 100, 25), "+5", bet_increase5_clicked)
+    bet_decrease5_btn = UIButton((20, 640, 100, 25), "-5", bet_decrease5_clicked)
+    deal_btn = UIButton((20, 675, 100, 25), "Deal", deal_button_clicked)
     return {
         "bet_increase5": bet_increase5_btn,
         "bet_decrease5": bet_decrease5_btn,
@@ -299,13 +317,13 @@ def define_bet_buttons():
 
 
 def define_menu_buttons():
-    menu_btn = UIButton((20, 155, 100, 25), "Menu", menu_button_clicked)
+    menu_btn = UIButton((20, 50, 100, 25), "Menu", menu_button_clicked)
     return {"menu": menu_btn}
 
 
 def define_UI_buttons():
-    hit_btn = UIButton((20, 675, 100, 25), "Hit", hit_button_clicked)
-    stand_btn = UIButton((20, 640, 100, 25), "Stand", stand_button_clicked)
+    hit_btn = UIButton((20, 640, 100, 25), "Hit", hit_button_clicked)
+    stand_btn = UIButton((20, 675, 100, 25), "Stand", stand_button_clicked)
     double_btn = UIButton((20, 605, 100, 25), "Double", double_button_clicked)
     split_btn = UIButton((20, 535, 100, 25), "Split", split_button_clicked)
     surrender_btn = UIButton((20, 570, 100, 25), "Surrender", surrender_button_clicked)
