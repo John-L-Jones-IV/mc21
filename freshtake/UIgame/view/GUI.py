@@ -7,7 +7,7 @@ import sys
 
 import pygame
 
-from model.blackjackcore import MAX_SPLITS, MIN_BET
+from model.blackjackcore import MAX_SPLITS, MAX_BET, MIN_BET
 from view.buttonclickedfunctions import (
     menu_button_clicked,
     hit_button_clicked,
@@ -43,17 +43,6 @@ play_decission_buttons, bet_buttons, menu_buttons = None, None, None
 _previous_game = None  # used to monitor state and trigger animations.
 temp_bet = MIN_BET
 
-def init():
-    pygame.init()
-    global _icon_img, window, play_decission_buttons, bet_buttons, menu_buttons
-    _icon_img = pygame.image.load(os.path.join("assets", "blackjackicon.png"))
-    pygame.display.set_icon(_icon_img)
-    pygame.display.set_caption("mc21 - Blackjack for Humans")
-    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    play_decission_buttons = define_UI_buttons()
-    bet_buttons = define_bet_buttons()
-    menu_buttons = define_menu_buttons()
-
 def update_screen(game):
     """Draw GUI screen with pygame."""
     monitor_changes_and_queue_animations(game)
@@ -63,38 +52,17 @@ def update_screen(game):
     bet_state = len(game.player1.hand) == 0
     if bet_state:
         draw_bet_menu(game)
-        # place bet sub menu
-        pass
     else:
+        # TODO: add shade to cards that are not active while drawing
+        draw_active_hand_indicator(game.player1.active_hand_index)
         draw_players_hands(game.player1.hands)
         draw_dealers_hand(game.dealer.hand)
         draw_game_info(game)
-        # TODO: add shade to cards that are not active while drawing
-        # draw_active_hand_indicator(game.player1.active_hand_index)
+    draw_buttons(play_decission_buttons)
+    draw_buttons(bet_buttons)
+    draw_buttons(menu_buttons)
     draw_bankroll(game)
     pygame.display.flip()
-
-def draw_bet_menu(game):
-    menu_rect = pygame.Rect((328, 110), (625, 500))
-    pygame.draw.rect(window, BLUE, menu_rect, border_radius=10)
-    # draw_chip(surface, color, pos, radius, text):
-    draw_chip(window, RED, (453, 360), 25, "5")
-    draw_chip(window, BLUE, (578, 360), 25, "10")
-    draw_chip(window, GREEN, (703, 360), 25, "25")
-    draw_chip(window, BLACK, (828, 360), 25, "100")
-    x, y = 640, 250
-    text_img = FONT.render(f"bet: {temp_bet}", False, WHITE)
-    img_width, img_height = text_img.get_size()
-    window.blit(text_img, (x - img_width // 2, y - img_height // 2))
-    
-def change_bet(x):
-    global temp_bet
-    temp_bet += x
-    if temp_bet < MIN_BET:
-        bet_buttons["deal"].set_active(False) 
-    else:
-        bet_buttons["deal"].set_active(True) 
-    
 
 #region Controller
 def process_user_input(game: Game):
@@ -117,54 +85,74 @@ def handle_event(event: pygame.event, game: Game):
                 btn.function(game)
 #end region
 
+def init():
+    pygame.init()
+    global _icon_img, window, play_decission_buttons, bet_buttons, menu_buttons
+    _icon_img = pygame.image.load(os.path.join("assets", "blackjackicon.png"))
+    pygame.display.set_icon(_icon_img)
+    pygame.display.set_caption("mc21 - Blackjack for Humans")
+    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    play_decission_buttons = define_UI_buttons()
+    bet_buttons = define_bet_buttons()
+    menu_buttons = define_menu_buttons()
+
+
+def draw_bet_menu(game):
+    menu_rect = pygame.Rect((328, 110), (625, 500))
+    pygame.draw.rect(window, BLUE, menu_rect, border_radius=10)
+    # draw_chip(surface, color, pos, radius, text):
+    draw_chip(window, RED, (453, 360), 25, "5")
+    draw_chip(window, BLUE, (578, 360), 25, "10")
+    draw_chip(window, GREEN, (703, 360), 25, "25")
+    draw_chip(window, BLACK, (828, 360), 25, "100")
+    x, y = 640, 250
+    text_img = FONT.render(f"bet: {temp_bet}", False, WHITE)
+    img_width, img_height = text_img.get_size()
+    window.blit(text_img, (x - img_width // 2, y - img_height // 2))
+    
+def change_bet(x):
+    global temp_bet
+    temp_bet += x
+    print(MIN_BET <= temp_bet <= MAX_BET)
+    is_deal_active = MIN_BET <= temp_bet <= MAX_BET
+    print(f"is_deal_active: {is_deal_active}")
+    bet_buttons["deal"].set_active(is_deal_active) 
+    # FIXME: active status does not update on the GUI?
+    
 def monitor_changes_and_queue_animations(game):
     global _previous_game
     if _previous_game is None:
         _previous_game = copy.deepcopy(game)
-        return
-    diff_d = get_diffs(_previous_game, game)
-    game_change_animations(game, _previous_game, diff_d)
+        return # don't do any comparisons on first call
+    queue_animations(game, _previous_game)
     _previous_game = copy.deepcopy(game)
 
-def game_change_animations(game, prev_game, diff_d):
-    if len(diff_d) > 0:
-        print('gamestate change detected!')
-        print(diff_d)
-        print([str(x) for x in diff_d.values()])
+def queue_animations(game, prev_game):
     if len(game.deck) < len(prev_game.deck):
         print('card moved from deck')
     if len(game.discard_pile) > len(prev_game.discard_pile):
         print('cards moved to discard pile')
+    if len(game.discard_pile) < len(prev_game.discard_pile):
+        print('cards moved to deck')
     if game.player1.bankroll != prev_game.player1.bankroll:
-        print('player bankroll has changed')
-
-def get_diffs(prev_obj, current_obj):
-    # TODO this nessisary? why not just do direct comparisons for triggers?
-    if prev_obj is None:
-        return current_obj.__dict__
-
-    assert isinstance(current_obj, type(prev_obj))
-    cur_d = current_obj.__dict__
-    prv_d = prev_obj.__dict__
-    return {k: cur_d[k] for k in cur_d if cur_d[k] != prv_d[k]}
-
+        print('player bankroll has changed', end=" ")
+        print(f'{game.player1.bankroll - prev_game.player1.bankroll}')
 
 def update_buttons_active_status(game):
-    if len(game.player1.hand) >= 2:
+    if len(game.player1.hand) > 0:
         update_play_state_buttons_activation_status(game)
-    elif len(game.player1.hand) == 0:
+    else:
         update_bet_state_buttons_activation_status(game)
-    all_btns = {}
-    all_btns.update(play_decission_buttons)
-    all_btns.update(bet_buttons)
-    all_btns.update(menu_buttons)
-    draw_buttons(all_btns)
 
 def update_bet_state_buttons_activation_status(game):
-    for b in play_decission_buttons.values():
-        b.set_hidden(True)
-    for b in bet_buttons.values():
-        b.set_active(True)
+    for btn in play_decission_buttons.values():
+        btn.set_hidden(True)
+        btn.set_active(False)
+    for name, btn in bet_buttons.items():
+        if name == "deal":
+            continue
+        btn.set_active(True)
+        btn.set_hidden(False)
 
 def update_play_state_buttons_activation_status(game):
     player = game.player1
@@ -182,7 +170,7 @@ def update_play_state_buttons_activation_status(game):
     is_surrender_btn_active = hand_len == 2 and num_hands == 1
     btns["surrender"].set_active(is_surrender_btn_active)
 
-    is_double_btn_active = hand_len = 2
+    is_double_btn_active = hand_len == 2
     btns["double"].set_active(is_double_btn_active)
 
     try:
@@ -195,11 +183,18 @@ def update_play_state_buttons_activation_status(game):
         is_split_btn_active = False
     btns["split"].set_active(is_split_btn_active)
 
+    for btn in btns.values():
+        btn.set_hidden(False)
+
+    btns = bet_buttons
+    for btn in btns.values():
+        btn.set_hidden(True)
+
 
 def draw_buttons(buttons):
     """Call draw() method for each button in list(buttons)"""
-    for b_key in buttons:
-        buttons[b_key].draw(window)
+    for btn in buttons.values():
+        btn.draw(window)
 
 
 def draw_chip(surface, color, pos, radius, text):

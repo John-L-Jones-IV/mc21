@@ -5,10 +5,11 @@ import copy
 import inspect
 import random
 
-# inital game settings, can be changed
+# inital game settings, can be changed and is encouraged to play with.
 NUM_DECKS_IN_GAME = 6
 STARTING_CASH = 200
 MIN_BET = 5
+MAX_BET = 100
 MAX_SPLITS = 4
 BLACKJACK_PAYS = 3.0 / 2.0
 
@@ -90,7 +91,8 @@ class Hand:
         assert isinstance(card, Card)
         self._hand.append(card)
 
-    def _get_num_aces(self):
+    @property
+    def _num_aces(self):
         num_aces = 0
         for card in self._hand:
             if card.value == "A":
@@ -102,28 +104,31 @@ class Hand:
         max_hand_value = sum(card.int_value for card in self._hand)
         if max_hand_value <= 21:
             return max_hand_value
-        for num_aces in range(1, self._get_num_aces() + 1):
+        for num_aces in range(1, self._num_aces + 1):
             if max_hand_value - (num_aces * 10) <= 21:
                 return max_hand_value - (num_aces * 10)
-        return max_hand_value - (self._get_num_aces() * 10)
+        return max_hand_value - (self._num_aces * 10)
 
     @property
     def second_best_value(self):
         max_hand_value = sum(card.int_value for card in self._hand)
         best_hand_value = self.best_value
         aces_used_in_best_hand = (max_hand_value - best_hand_value) // 10
-        num_aces = self._get_num_aces()
+        num_aces = self._num_aces
         for ace_cnt in range(aces_used_in_best_hand + 1, num_aces + 1):
             if max_hand_value - (ace_cnt * 10) <= 21:
                 return max_hand_value - (ace_cnt * 10)
         return max_hand_value - (num_aces * 10)
 
+    @property
     def is_bust(self):
         return self.best_value > 21
 
+    @property
     def is_blackjack(self):
         return self.best_value == 21 and len(self._hand) == 2
 
+    @property
     def is_splitable(self):
         card1_value = self._hand[0].int_value
         card2_value = self._hand[1].int_value
@@ -253,7 +258,7 @@ class Dealer:
         self.hand.push(card)
 
     @property
-    def card_showing(self):
+    def showing_card(self):
         return self.hand[1]
 
     def move_all_cards(self, destination: list()):
@@ -276,7 +281,7 @@ def addscardtohand(f):
     def wrapper(self):
         f(self)  # execute decorated function,
         # then do some post checks.
-        if self.player1.hand.is_blackjack() or self.player1.hand.is_bust():
+        if self.player1.hand.is_blackjack or self.player1.hand.is_bust:
             if self.player1.active_hand_index > 0:
                 self.stand_player()
     return wrapper
@@ -317,9 +322,9 @@ class Game:
     def evaluate_hands(self):
         dealer_score = self.dealer.hand.best_value
         for hand in self.player1.hands:
-            if hand.is_blackjack() and not self.dealer.hand.is_blackjack():
+            if hand.is_blackjack and not self.dealer.hand.is_blackjack:
                 self.player1.bankroll += hand.bet * BLACKJACK_PAYS
-            elif hand.is_bust():
+            elif hand.is_bust:
                 self.player1.bankroll -= hand.bet
             elif hand.best_value > dealer_score:
                 self.player1.bankroll += hand.bet
@@ -348,7 +353,7 @@ class Game:
     @addscardtohand
     def hit_player(self):
         player = self.player1
-        assert not player.hand.is_bust()
+        assert not player.hand.is_bust
         card = self.deck.pop()
         player.add_card_to_hand(card)
 
