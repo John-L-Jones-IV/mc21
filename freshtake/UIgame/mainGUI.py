@@ -16,8 +16,9 @@ def main():
     # game.deal_cards()
     while True:
         clock.tick(GUI.FPS)  # Ensure while loop only executes at FPS rate.
-        GUI.process_user_input(game) # modify game variables.
-        GUI.update_screen(game) # update display based on change to game vars.
+        GUI.process_user_input(game)  # modify game variables.
+        GUI.update_screen(game)  # update display based on change to game vars.
+
 
 if __name__ == "__main__":
     main()

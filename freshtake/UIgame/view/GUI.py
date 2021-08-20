@@ -17,7 +17,7 @@ from view.buttonclickedfunctions import (
     double_button_clicked,
     deal_button_clicked,
     bet_increase5_clicked,
-    bet_decrease5_clicked
+    bet_decrease5_clicked,
 )
 from view.GUIbutton import UIButton
 
@@ -43,6 +43,7 @@ play_decission_buttons, bet_buttons, menu_buttons = None, None, None
 _previous_game = None  # used to monitor state and trigger animations.
 temp_bet = MIN_BET
 
+
 def update_screen(game):
     """Draw GUI screen with pygame."""
     monitor_changes_and_queue_animations(game)
@@ -64,7 +65,8 @@ def update_screen(game):
     draw_bankroll(game)
     pygame.display.flip()
 
-#region Controller
+
+# region Controller
 def process_user_input(game: Game):
     """Handle pygame events."""
     for event in pygame.event.get():
@@ -72,6 +74,7 @@ def process_user_input(game: Game):
             pygame.quit()
             sys.exit()
         handle_event(event, game)
+
 
 def handle_event(event: pygame.event, game: Game):
     """Handle pygame events and send user request to blackjackcore."""
@@ -83,7 +86,10 @@ def handle_event(event: pygame.event, game: Game):
         for btn in btns.values():
             if btn.is_mouse_position_colliding(mouse_pos):
                 btn.function(game)
-#end region
+
+
+# end region
+
 
 def init():
     pygame.init()
@@ -109,34 +115,36 @@ def draw_bet_menu(game):
     text_img = FONT.render(f"bet: {temp_bet}", False, WHITE)
     img_width, img_height = text_img.get_size()
     window.blit(text_img, (x - img_width // 2, y - img_height // 2))
-    
+
+
 def change_bet(x):
     global temp_bet
     temp_bet += x
     print(MIN_BET <= temp_bet <= MAX_BET)
     is_deal_active = MIN_BET <= temp_bet <= MAX_BET
     print(f"is_deal_active: {is_deal_active}")
-    bet_buttons["deal"].set_active(is_deal_active) 
+    bet_buttons["deal"].set_active(is_deal_active)
     # FIXME: active status does not update on the GUI?
-    
+
+
 def monitor_changes_and_queue_animations(game):
     global _previous_game
     if _previous_game is None:
         _previous_game = copy.deepcopy(game)
-        return # don't do any comparisons on first call
-    queue_animations(game, _previous_game)
+        return  # don't do any comparisons on first call
+    if len(_previous_game.player1.hand) == 0 and len(game.player1.hand) == 2:
+        print("cards delt")
+    elif len(game.deck) < len(_previous_game.deck):
+        print("card moved from deck")
+    if len(game.discard_pile) > len(_previous_game.discard_pile):
+        print("table cleared")
+    if len(game.discard_pile) < len(_previous_game.discard_pile):
+        print("reshuffled")
+    if game.player1.bankroll != _previous_game.player1.bankroll:
+        print("player bankroll has changed", end=" ")
+        print(f"{game.player1.bankroll - _previous_game.player1.bankroll}")
     _previous_game = copy.deepcopy(game)
 
-def queue_animations(game, prev_game):
-    if len(game.deck) < len(prev_game.deck):
-        print('card moved from deck')
-    if len(game.discard_pile) > len(prev_game.discard_pile):
-        print('cards moved to discard pile')
-    if len(game.discard_pile) < len(prev_game.discard_pile):
-        print('cards moved to deck')
-    if game.player1.bankroll != prev_game.player1.bankroll:
-        print('player bankroll has changed', end=" ")
-        print(f'{game.player1.bankroll - prev_game.player1.bankroll}')
 
 def update_buttons_active_status(game):
     if len(game.player1.hand) > 0:
@@ -144,15 +152,17 @@ def update_buttons_active_status(game):
     else:
         update_bet_state_buttons_activation_status(game)
 
+
 def update_bet_state_buttons_activation_status(game):
     for btn in play_decission_buttons.values():
         btn.set_hidden(True)
         btn.set_active(False)
     for name, btn in bet_buttons.items():
-        if name == "deal":
-            continue
-        btn.set_active(True)
         btn.set_hidden(False)
+        if name == "deal":
+            continue  # don't interfere w/ the set bet function
+        btn.set_active(True)
+
 
 def update_play_state_buttons_activation_status(game):
     player = game.player1
@@ -217,8 +227,7 @@ def draw_chips(surface):
         draw_chip(surface, color, pos, radius, text)
 
 
-def draw_card(
-        window: pygame.Surface, card: blackjackcore.Card, pos: (x, y)) -> None:
+def draw_card(window: pygame.Surface, card: blackjackcore.Card, pos: (x, y)) -> None:
     suit, val = card.suit, card.value
     if card.showing:
         img_path = os.path.join("assets", "cards", suit + "_" + val + ".png")
@@ -256,10 +265,12 @@ def draw_dealers_hand(hand):
         y = start_y + cnt * y_step
         draw_card(window, card, (x, y))
 
+
 def draw_bankroll(game):
     text = f"Bankroll: {game.player1.bankroll}"
     text_surface = FONT.render(text, True, BLACK)
     window.blit(text_surface, (20, 20))
+
 
 def draw_game_info(game):
     x_start, y = 250, 690
@@ -275,22 +286,22 @@ def draw_game_info(game):
     text_surface = FONT.render(game_info_str, True, BLACK)
     window.blit(text_surface, (x, y))
 
+
 def define_bet_buttons():
     bet_increase5_btn = UIButton((20, 600, 100, 25), "+5", bet_increase5_clicked)
     bet_decrease5_btn = UIButton((20, 675, 100, 25), "-5", bet_decrease5_clicked)
     deal_btn = UIButton((20, 500, 100, 25), "Deal", deal_button_clicked)
     return {
-            "bet_increase5": bet_increase5_btn,
-            "bet_decrease5": bet_decrease5_btn,
-            "deal": deal_btn
+        "bet_increase5": bet_increase5_btn,
+        "bet_decrease5": bet_decrease5_btn,
+        "deal": deal_btn,
     }
 
 
 def define_menu_buttons():
     menu_btn = UIButton((20, 155, 100, 25), "Menu", menu_button_clicked)
-    return {
-            "menu": menu_btn
-    }
+    return {"menu": menu_btn}
+
 
 def define_UI_buttons():
     hit_btn = UIButton((20, 675, 100, 25), "Hit", hit_button_clicked)
